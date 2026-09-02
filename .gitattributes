@@ -1,0 +1,35 @@
+# Normalise line endings.
+#
+# Without this, files touched on Windows are stored with CRLF and files touched
+# by anything else with LF, so git reports the entire repository as modified
+# whenever the two meet - 143 files "changed" when only two of them actually
+# were. That buries the real diff and makes review pointless.
+#
+# `text=auto eol=lf` stores everything as LF in the repository while leaving
+# your working copy alone. Run this once to apply it to what is already
+# committed:
+#
+#     git add --renormalize .
+#     git commit -m "Normalise line endings"
+#
+* text=auto eol=lf
+
+# Shell scripts must be LF even on Windows - a CRLF in a shebang line breaks
+# the script inside a Linux container.
+*.sh   text eol=lf
+*.js   text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+*.sql  text eol=lf
+*.md   text eol=lf
+Dockerfile text eol=lf
+
+# Binary - never touched, never diffed as text.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.pdf  binary
+*.ico  binary
+*.zip  binary

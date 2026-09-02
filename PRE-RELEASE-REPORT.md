@@ -48,10 +48,14 @@ rm -rf .git
 git init
 git add .
 git commit -m "Student Helper v2"
-git branch -M main
 git remote add origin <your new repo url>
-git push -u origin main
+git push -u origin HEAD          # pushes whatever branch you are on
 ```
+
+Whichever branch you end up on is fine — just make it the repository's default
+branch in GitHub's settings, and keep only that one. Two branches pointing at
+the same commit is the thing that makes a deploy platform ask you which to
+build.
 
 Check `git status` before that commit and confirm `.env` is not listed. If you
 want to keep the old history instead, you have to rewrite it with
