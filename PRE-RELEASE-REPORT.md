@@ -16,7 +16,7 @@ hand, and Vercel will not run this app.**
 `.env.example` contained a real, working-format key:
 
 ```
-GEMINI_API_KEY=AQ.Ab8RN6JSBWk5OsGgUXg9jVcuKj3GlAIEikWvEAbtYRy9-lb63g
+GEMINI_API_KEY=
 ```
 
 `.env` is correctly git-ignored, but `.env.example` is not — it is *meant* to
