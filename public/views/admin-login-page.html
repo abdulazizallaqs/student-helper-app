@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+<!-- Admin login is now unified into the single /login form - this page only
+     exists so old bookmarks/links don't dead-end, and forwards visitors on. -->
+<meta http-equiv="refresh" content="0; url=/login">
+<title>Redirecting to login…</title>
+<link rel="stylesheet" href="../css/design-system.css">
+  <script src="../js/i18n.js"></script>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box" style="text-align:center;">
+      <p class="textl">Admin login has moved.</p>
+      <p><a href="/login">Continue to the login page</a></p>
+    </div>
+  </div>
+  <script>window.location.replace('/login');</script>
+</body>
+</html>

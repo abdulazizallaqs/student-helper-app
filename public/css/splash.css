@@ -1,0 +1,574 @@
+/* ==========================================================================
+   Student Helper — Splash / Landing page styles
+   Scoped under .splash-page so nothing here can leak into or collide with
+   design-system.css's shared classes used across the rest of the app.
+   Reuses the same --sh-* tokens from design-system.css for visual consistency.
+   ========================================================================== */
+
+.splash-page { overflow-x: hidden; }
+
+.splash-page a { text-decoration: none; }
+
+/* ---- Top nav ---- */
+.splash-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: rgba(245, 246, 244, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.splash-nav.is-scrolled {
+  border-bottom-color: var(--sh-line);
+  box-shadow: 0 4px 18px rgba(28, 36, 32, 0.06);
+  background: rgba(245, 246, 244, 0.95);
+}
+
+.splash-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--sh-ink);
+}
+
+.splash-brand .splash-logo-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--sh-accent), #12a06f);
+  color: #fff;
+  font-size: 1rem;
+  box-shadow: 0 6px 16px rgba(14, 122, 86, 0.35);
+}
+
+.splash-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-weight: 600;
+  color: var(--sh-muted);
+}
+
+.splash-nav-links a {
+  color: var(--sh-muted);
+  transition: color 0.2s ease;
+  position: relative;
+  padding: 4px 0;
+}
+
+.splash-nav-links a:hover { color: var(--sh-accent); }
+
+.splash-nav-actions { display: flex; align-items: center; gap: 10px; }
+
+.splash-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: 100px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.splash-btn:active { transform: scale(0.97); }
+
+.splash-btn-primary {
+  background: var(--sh-accent);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(14, 122, 86, 0.28);
+}
+.splash-btn-primary:hover { background: var(--sh-accent-hover); box-shadow: 0 12px 28px rgba(14, 122, 86, 0.36); transform: translateY(-1px); }
+
+.splash-btn-ghost {
+  background: transparent;
+  color: var(--sh-ink);
+  border-color: var(--sh-line);
+}
+.splash-btn-ghost:hover { border-color: var(--sh-accent); color: var(--sh-accent); }
+
+.splash-menu-toggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--sh-line);
+  background: var(--sh-surface);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--sh-ink);
+}
+
+/* ---- Hero ---- */
+.splash-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 48px;
+  align-items: center;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 72px 24px 96px;
+}
+
+.splash-hero-blob {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.splash-hero-blob span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  animation: splash-float 16s ease-in-out infinite;
+}
+
+.splash-hero-blob span:nth-child(1) {
+  width: 380px; height: 380px;
+  background: var(--sh-accent);
+  top: -120px; inset-inline-end: -80px;
+}
+.splash-hero-blob span:nth-child(2) {
+  width: 300px; height: 300px;
+  background: #f0c14b;
+  bottom: -100px; inset-inline-start: 10%;
+  animation-delay: -6s;
+}
+
+@keyframes splash-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-20px, 30px) scale(1.06); }
+}
+
+.splash-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--sh-accent-soft);
+  color: var(--sh-accent-ink);
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 7px 14px;
+  border-radius: 100px;
+  margin-bottom: 18px;
+}
+
+.splash-hero h1 {
+  font-size: clamp(2.1rem, 4vw, 3.1rem);
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--sh-ink);
+  margin: 0 0 18px;
+  letter-spacing: -0.01em;
+}
+
+.splash-hero h1 .splash-accent-text { color: var(--sh-accent); }
+
+.splash-hero p.splash-lead {
+  font-size: 1.1rem;
+  color: var(--sh-muted);
+  line-height: 1.8;
+  max-width: 46ch;
+  margin: 0 0 30px;
+}
+
+.splash-hero-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+.splash-hero-note {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--sh-muted);
+}
+.splash-hero-note i { color: var(--sh-accent); }
+
+/* ---- Hero flashcard demo ---- */
+.splash-demo-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.splash-demo-card {
+  width: min(360px, 100%);
+  aspect-ratio: 4 / 3;
+  perspective: 1400px;
+  cursor: pointer;
+}
+
+.splash-demo-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+}
+
+.splash-demo-card.is-flipped .splash-demo-card-inner { transform: rotateY(180deg); }
+
+.splash-demo-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-surface);
+  box-shadow: var(--sh-shadow-lg);
+  border: 1px solid var(--sh-line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 28px;
+  gap: 12px;
+}
+
+.splash-demo-face.is-back { transform: rotateY(180deg); background: var(--sh-accent-soft); }
+
+.splash-demo-face .splash-demo-tag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--sh-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.splash-demo-face .splash-demo-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--sh-ink);
+  line-height: 1.6;
+}
+
+.splash-demo-hint {
+  font-size: 0.82rem;
+  color: var(--sh-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.splash-demo-caption {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: var(--sh-muted);
+}
+
+/* ---- Reveal-on-scroll ---- */
+.splash-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.splash-reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+/* ---- Sections ---- */
+.splash-section {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 88px 24px;
+}
+
+.splash-section-head {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 52px;
+}
+
+.splash-section-head h2 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: var(--sh-ink);
+  margin: 0 0 12px;
+}
+
+.splash-section-head p {
+  color: var(--sh-muted);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* ---- About ---- */
+.splash-about {
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius-lg);
+  padding: 48px;
+  box-shadow: var(--sh-shadow);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.splash-about-copy { grid-column: span 3; color: var(--sh-muted); font-size: 1.05rem; line-height: 1.9; margin: 0 0 28px; }
+
+.splash-about-stat {
+  text-align: center;
+  padding: 18px;
+  border-radius: var(--sh-radius);
+  background: var(--sh-surface-2);
+}
+
+.splash-about-stat i { font-size: 1.4rem; color: var(--sh-accent); margin-bottom: 10px; display: block; }
+.splash-about-stat strong { display: block; font-size: 1.05rem; color: var(--sh-ink); margin-bottom: 4px; }
+.splash-about-stat span { font-size: 0.85rem; color: var(--sh-muted); }
+
+/* ---- Feature grid ---- */
+.splash-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.splash-feature-card {
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius-lg);
+  padding: 28px;
+  box-shadow: var(--sh-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.splash-feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--sh-shadow-lg);
+  border-color: var(--sh-accent-soft);
+}
+
+.splash-feature-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sh-accent-soft);
+  color: var(--sh-accent);
+  font-size: 1.3rem;
+  margin-bottom: 18px;
+  transition: transform 0.25s ease;
+}
+
+.splash-feature-card:hover .splash-feature-icon { transform: scale(1.08) rotate(-4deg); }
+
+.splash-feature-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sh-ink);
+  margin: 0 0 8px;
+}
+
+.splash-feature-card p {
+  font-size: 0.92rem;
+  color: var(--sh-muted);
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* ---- How it works ---- */
+.splash-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.splash-steps::before {
+  content: "";
+  position: absolute;
+  top: 26px;
+  inset-inline-start: 16%;
+  inset-inline-end: 16%;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--sh-line) 0 10px, transparent 10px 18px);
+  z-index: 0;
+}
+
+.splash-step {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.splash-step-num {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--sh-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.2rem;
+  box-shadow: 0 10px 22px rgba(14, 122, 86, 0.3);
+}
+
+.splash-step h3 { font-size: 1.05rem; font-weight: 700; color: var(--sh-ink); margin: 0 0 8px; }
+.splash-step p { font-size: 0.9rem; color: var(--sh-muted); line-height: 1.75; margin: 0; max-width: 26ch; margin-inline: auto; }
+
+/* ---- CTA banner ---- */
+.splash-cta {
+  max-width: 1180px;
+  margin: 0 auto 88px;
+  padding: 56px 24px;
+  border-radius: var(--sh-radius-lg);
+  background: linear-gradient(135deg, var(--sh-accent), #0a5d43);
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 20px 44px rgba(14, 122, 86, 0.3);
+}
+
+.splash-cta h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; margin: 0 0 12px; }
+.splash-cta p { opacity: 0.9; margin: 0 0 26px; font-size: 1.02rem; }
+
+.splash-cta .splash-btn-primary { background: #fff; color: var(--sh-accent-ink); box-shadow: 0 10px 24px rgba(0,0,0,0.18); }
+.splash-cta .splash-btn-primary:hover { background: #f2f2f2; }
+
+/* ---- Footer ---- */
+.splash-footer {
+  border-top: 1px solid var(--sh-line);
+  padding: 32px 24px 40px;
+}
+
+.splash-footer-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.splash-footer-links { display: flex; gap: 20px; font-size: 0.88rem; color: var(--sh-muted); flex-wrap: wrap; }
+.splash-footer-links a { color: var(--sh-muted); transition: color 0.2s ease; }
+.splash-footer-links a:hover { color: var(--sh-accent); }
+.splash-footer-copy { font-size: 0.85rem; color: var(--sh-muted); }
+
+/* ---- Responsive ---- */
+@media (max-width: 920px) {
+  .splash-hero { grid-template-columns: 1fr; padding-top: 40px; }
+  .splash-about { grid-template-columns: 1fr 1fr; }
+  .splash-about-copy { grid-column: span 2; }
+  .splash-features-grid { grid-template-columns: 1fr 1fr; }
+  .splash-steps { grid-template-columns: 1fr; gap: 40px; }
+  .splash-steps::before { display: none; }
+}
+
+@media (max-width: 680px) {
+  .splash-nav-links { display: none; }
+  .splash-menu-toggle { display: flex; }
+  .splash-nav-actions .splash-btn-ghost { display: none; }
+  .splash-about { grid-template-columns: 1fr; }
+  .splash-about-copy { grid-column: span 1; }
+  .splash-features-grid { grid-template-columns: 1fr; }
+  .splash-hero { text-align: center; }
+  .splash-hero-actions { justify-content: center; }
+  .splash-hero-note { justify-content: center; }
+}
+
+/* ---- Rotating headline word ---- */
+.splash-rotate {
+  display: inline-block;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.splash-rotate.is-swapping { opacity: 0; transform: translateY(6px); }
+
+/* ---- FAQ accordion ---- */
+.splash-faq {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.splash-faq-item {
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius);
+  background: var(--sh-surface);
+  box-shadow: var(--sh-shadow);
+  overflow: hidden;
+}
+
+.splash-faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: start;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sh-ink);
+  font-family: var(--sh-font);
+}
+
+.splash-faq-question i {
+  color: var(--sh-accent);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.splash-faq-item.is-open .splash-faq-question i { transform: rotate(180deg); }
+
+.splash-faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.splash-faq-item.is-open .splash-faq-answer { grid-template-rows: 1fr; }
+
+.splash-faq-answer p {
+  overflow: hidden;
+  margin: 0;
+  padding: 0 22px 20px;
+  color: var(--sh-muted);
+  font-size: 0.94rem;
+  line-height: 1.8;
+  min-height: 0;
+}
+
+.splash-faq-answer { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-reveal { transition: none; opacity: 1; transform: none; }
+  .splash-hero-blob span { animation: none; }
+  .splash-demo-card-inner { transition: none; }
+  .splash-rotate { transition: none; }
+  .splash-faq-answer { transition: none; }
+}

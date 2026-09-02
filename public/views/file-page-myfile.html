@@ -1,0 +1,219 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>My Files - Student Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+  <script src="../js/displayChat.js"></script>
+  <script src="../js/addMsg.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../js/toast.js"></script>
+  <script src="../js/search.js"></script>
+
+  <link rel="stylesheet" href="../css/design-system.css">
+  <script src="../js/theme.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/fileCard.js"></script>
+  <script src="../js/aiSummary.js"></script>
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <div class="flex flex-col h-screen bg-background">
+      <header class="flex flex-col items-center justify-between p-8">
+        <h1 class="texth justify-center">Student Helper</h1>
+        <div class="search-box">
+          <button class="btn-search"><i class="fa fa-search" aria-hidden="false"></i></button>
+          <input type="text" class="input-search" placeholder="Type to Search..." data-i18n-placeholder="common.searchPlaceholder">
+        </div>
+      </header>
+
+      <div>
+        <nav class="navbar">
+          <a href="/views/profile.html" class="navy" title="My account" data-i18n-title="nav.account" data-i18n-aria="nav.account"><i class="fa fa-user-circle" aria-hidden="false"></i></a>
+          <a href="/views/chat.html" class="navy" title="Messages" data-i18n-title="nav.messages" data-i18n-aria="nav.messages"><i class="fa-solid fa-comments"></i></a>
+          <a href="/views/ai-buddy.html" class="navy" title="AI Study Buddy" data-i18n-title="nav.aiBuddy" data-i18n-aria="nav.aiBuddy"><i class="fas fa-robot"></i></a>
+          <a href="/views/add-file.html" class="navy" title="Add a file" data-i18n-title="nav.addFile" data-i18n-aria="nav.addFile"><i class="fa fa-plus-square" aria-hidden="false"></i></a>
+          <a href="/views/File-page.html" class="navy" title="Files" data-i18n-title="nav.files" data-i18n-aria="nav.files"><i class="fa fa-file" aria-hidden="false"></i></a>
+          <a href="/views/favorite.html" class="navy" title="Favourites" data-i18n-title="nav.favorites" data-i18n-aria="nav.favorites"><i class="fa fa-bookmark" aria-hidden="false"></i></a>
+        </nav>
+      </div>
+
+      <div>
+        <nav class="navbar2">
+          <a href="../views/file-page-forme.html" class="navy2">
+            <h1 data-i18n="files.forMe">For Me</h1>
+          </a>
+          <a href="../views/file-page-myfile.html" class="navy2">
+            <h1 data-i18n="files.myFiles">My Files</h1>
+          </a>
+        </nav>
+      </div>
+
+      <div class="container">
+
+        <!-- Cards will be dynamically added here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- modal confirmation message -->
+  <div id="deleteConfirmationModal" class="modal-message" style="display: none;">
+    <div class="modal-content-m">
+      <h2 id="modalTitle"></h2>
+      <p id="modalMessage"></p>
+      <div>
+        <button id="confirmDeleteBtn">Confirm</button>
+        <button id="cancelDeleteBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <!--End modal confirmation message -->
+
+  <!-- Modal for add Message -->
+  <div class="modal" id="msg">
+    <span class="close" onclick="closeMsg()">&times;</span>
+    <h1 class="" data-i18n="msg.title">Add Message</h1>
+    <form action="/add-msg" method="POST" id="add-message">
+
+      <select name="receiver" class="input-data" id="receiver" required>
+        <option value="" disabled selected data-i18n="msg.chooseReceiver">Choose a receiver</option>
+      </select>
+
+      <textarea name="content" class="input-field2" id="content" placeholder="Content..." data-i18n-placeholder="msg.content" required></textarea>
+      <div class="button-container">
+        <button type="submit" class="btn-msg" data-i18n="msg.send">Send Message</button>
+      </div>
+    </form>
+  </div>
+  <!-- End Modal for add Message -->
+
+  <div id="updateModal" class="Modal">
+    <span class="close" onclick="closeUpdate()">&times;</span>
+
+    <h1 data-i18n="edit.title">Change File</h1>
+    <form id="updateForm" method="post">
+      <input type="hidden" id="fileId" name="fileId" />
+
+      <label class="label-data" for="fileName" data-i18n="edit.name">File Name</label>
+      <input type="text" class="input-data" id="title" name="title" required>
+
+      <label class="label-data" for="fileDescription" data-i18n="edit.description">Description:</label>
+      <input type="text" class="input-data" id="description" name="description" required>
+
+      <label class="label-data" for="categoryFile" data-i18n="edit.category">Category:</label>
+      <select name="category" class="input-data" id="categoryFile">
+        <option value="" disabled selected data-i18n="edit.chooseCategory">Choose a category</option>
+      </select>
+
+      <button type="submit" class="update-button" data-i18n="edit.save">Change</button>
+
+    </form>
+
+    <button id="btnClickDelete" class="update-delete" data-i18n="edit.delete">Delete</button>
+
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const categorySelect = document.getElementById('categoryFile'); // Reference to dropdown
+
+      // Fetch categories from backend
+      fetch('/categories')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch categories');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Fetched categories:', data); // Debugging fetched categories
+
+          data.forEach(categoryFile => {
+            const option = document.createElement('option');
+            option.value = categoryFile.id; // Category ID
+            option.textContent = categoryFile.name; // Category Name
+            categorySelect.appendChild(option);
+          });
+          // Removed: `modal.dataset.fileId = fileId;` - neither `modal` nor
+          // `fileId` exists in this DOMContentLoaded scope, so this threw a
+          // ReferenceError on every page load. The throw was swallowed by the
+          // .catch() below and mislabelled "Error fetching categories", even
+          // though the categories had in fact loaded fine. The file id the
+          // edit form actually uses is the hidden #fileId input, which
+          // displayChat.js#modify() populates.
+        })
+        .catch(error => {
+          console.error('Error fetching categories:', error);
+        });
+    });
+  </script>
+
+  <script>
+    // The current user's own uploads. Cards come from public/js/fileCard.js.
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.querySelector('.container');
+      container.innerHTML = '<div class="cards-empty-state"><span>Loading your files...</span></div>';
+
+      fetch('/my-files')
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to fetch files');
+          return response.json();
+        })
+        .then(files => {
+          renderFileCards(container, files, {
+            favorite: true,
+            edit: true,
+            summarize: true,
+            emptyIcon: 'fa fa-cloud-arrow-up',
+            emptyKey: 'files.emptyMine',
+            emptyMessage: 'You have not uploaded anything yet - add your first file.'
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching files:', error);
+          container.innerHTML =
+            '<div class="cards-empty-state"><i class="fa fa-triangle-exclamation"></i>' +
+            '<span>Could not load your files. Please refresh the page.</span></div>';
+        });
+    });
+
+    // Delete, from inside the edit dialog.
+    //
+    // This used to call deleteFile(filed), where `filed` was a module-level
+    // variable reassigned inside the card-rendering loop by a
+    // `${filed = file.id}` expression buried in the template string. It
+    // therefore always held the id of the LAST card rendered on the page -
+    // so pressing Delete in the edit dialog deleted the wrong file unless
+    // you happened to be editing the final card. The dialog already knows
+    // which file it is editing: the hidden #fileId input that modify()
+    // populates.
+    document.getElementById('btnClickDelete').addEventListener('click', function () {
+      const fileId = document.getElementById('fileId').value;
+      if (!fileId) {
+        if (typeof showToast === 'function') showToast(t('edit.noFileOpen', 'No file is open for editing.'), 'warning');
+        return;
+      }
+      deleteFile(fileId);
+    });
+  </script>
+
+
+</body>
+
+</html>

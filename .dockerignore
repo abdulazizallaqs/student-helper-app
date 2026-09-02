@@ -1,0 +1,21 @@
+# Anything here is never copied into the image. Two reasons that matters:
+# the image stays small, and secrets stay out of it.
+node_modules
+npm-debug.log
+.git
+.gitignore
+
+# NEVER bake .env into an image. Environment variables are set on the platform;
+# an image carrying real credentials leaks them to anyone who can pull it.
+.env
+.env.*
+!.env.example
+
+# Other people's uploads do not belong in a build artifact.
+public/uploads/*
+
+tests
+_to_delete
+*.md
+!README.md
+.hintrc

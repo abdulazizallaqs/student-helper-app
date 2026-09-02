@@ -1,0 +1,1896 @@
+/* ==========================================================================
+   Student Helper — Design System
+   Shared visual language for the student-facing app (auth, dashboard, files,
+   AI tools, messaging). Replaces main-style.css / main-style2.css / cards.css
+   / add.css / responsive.css. Keeps every existing class/id name so no HTML
+   markup or JavaScript hooks need to change — only how they look.
+   ========================================================================== */
+
+:root {
+  /* Palette: warm neutral surface + emerald accent (kept the app's original
+     brand color family, #483C32, only as a secondary "roasted" tone — the
+     accent is what carries interactive elements now). */
+  --sh-bg: #f5f6f4;
+  --sh-surface: #ffffff;
+  --sh-surface-2: #eef1ea;
+  --sh-ink: #1c2420;
+  --sh-muted: #5c6660;
+  --sh-line: #e0e4dc;
+  --sh-accent: #0e7a56;
+  --sh-accent-ink: #06301f;
+  --sh-accent-soft: #e1f0e6;
+  --sh-accent-hover: #0b6247;
+  --sh-warm: #6d5e52;
+  --sh-danger: #b3402f;
+  --sh-danger-soft: #f6e4df;
+  --sh-success: #1f8a4c;
+  --sh-warning: #b9721f;
+  /* Favourite/bookmark amber - its own hue so "save this" reads differently
+     from every other action at a glance. */
+  --sh-fav: #c9821a;
+  --sh-fav-ink: #5a3808;
+  --sh-fav-soft: #fbeed6;
+  --sh-fav-shadow: rgba(201, 130, 26, 0.28);
+  --sh-accent-shadow: rgba(14, 122, 86, 0.24);
+  --sh-radius-sm: 8px;
+  --sh-radius: 14px;
+  --sh-radius-lg: 20px;
+  --sh-shadow: 0 8px 24px rgba(28, 36, 32, 0.08);
+  --sh-shadow-lg: 0 16px 40px rgba(28, 36, 32, 0.16);
+  --sh-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Dark theme - toggled by public/js/theme.js via [data-theme] on <html>.
+   Same token names, different values, so every existing component (cards,
+   modals, inputs, buttons...) goes dark automatically with no markup changes. */
+:root[data-theme="dark"] {
+  --sh-bg: #121815;
+  --sh-surface: #1b2420;
+  --sh-surface-2: #212b26;
+  --sh-ink: #eef2ef;
+  --sh-muted: #9aa79f;
+  --sh-line: #2a352f;
+  --sh-accent: #22c98f;
+  --sh-accent-ink: #d9f7e9;
+  --sh-accent-soft: #17352a;
+  --sh-accent-hover: #2ee3a2;
+  --sh-warm: #b8a48f;
+  --sh-danger: #e26854;
+  --sh-danger-soft: #3a2420;
+  --sh-success: #3fbd77;
+  --sh-warning: #e0a542;
+  --sh-fav: #e3a944;
+  --sh-fav-ink: #fdf0d8;
+  --sh-fav-soft: #3a2c14;
+  --sh-fav-shadow: rgba(227, 169, 68, 0.3);
+  --sh-accent-shadow: rgba(34, 201, 143, 0.28);
+  --sh-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --sh-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--sh-font);
+  background: var(--sh-bg);
+  background-image: none;
+  color: var(--sh-ink);
+  -webkit-font-smoothing: antialiased;
+  animation: sh-page-fade-in 0.35s ease both;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+@keyframes sh-page-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
+}
+
+a { color: inherit; }
+button { font-family: var(--sh-font); }
+
+/* Brand / page title -------------------------------------------------- */
+
+.texth, .textl {
+  font-family: var(--sh-font);
+  font-weight: 800;
+  color: var(--sh-ink);
+  letter-spacing: -0.01em;
+}
+
+.texth {
+  font-size: 1.6rem !important;
+  text-shadow: none !important;
+}
+
+.textl {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.1rem !important;
+  font-weight: 600;
+  color: var(--sh-muted);
+}
+
+.header {
+  position: static;
+  top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 20px 16px 8px;
+  text-align: center;
+  background: transparent;
+  z-index: 10;
+}
+
+/* Search ---------------------------------------------------------------- */
+
+.search-box {
+  width: min(420px, 100%);
+  height: auto;
+  position: relative;
+}
+
+.input-search {
+  height: 44px;
+  width: 100%;
+  border: 1px solid var(--sh-line);
+  padding: 0 44px 0 16px;
+  font-size: 15px;
+  letter-spacing: normal;
+  outline: none;
+  border-radius: 100px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--sh-surface);
+  color: var(--sh-ink);
+  box-shadow: var(--sh-shadow);
+}
+
+.input-search::placeholder {
+  color: var(--sh-muted);
+  font-size: 14px;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
+.input-search:focus {
+  width: 100% !important;
+  border-radius: 100px !important;
+  background-color: var(--sh-surface) !important;
+  border: 1px solid var(--sh-accent) !important;
+  box-shadow: 0 0 0 3px var(--sh-accent-soft) !important;
+  transition: none !important;
+}
+
+.btn-search {
+  width: 38px;
+  height: 38px;
+  border-style: none;
+  font-size: 15px;
+  outline: none;
+  cursor: pointer;
+  border-radius: 50%;
+  position: absolute;
+  inset-inline-end: 3px;
+  top: 3px;
+  color: #fff;
+  background-color: var(--sh-accent);
+  transition: background-color 0.2s ease;
+}
+
+.btn-search:hover { background-color: var(--sh-accent-hover); }
+.btn-search:focus-visible,
+.input-search:focus-visible { outline: 2px solid var(--sh-accent); outline-offset: 2px; }
+
+/* Navbar ------------------------------------------------------------------ */
+
+.navbar {
+  background-color: var(--sh-surface);
+  display: flex;
+  list-style-type: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 100px;
+  box-shadow: var(--sh-shadow);
+  border: 1px solid var(--sh-line);
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.navy {
+  font-size: 1.05rem;
+  margin: 0;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sh-muted);
+  border-radius: 50%;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+}
+
+.navy:hover, .navy:focus-visible {
+  font-size: 1.05rem;
+  background-color: var(--sh-accent-soft);
+  color: var(--sh-accent-ink);
+  outline: none;
+}
+
+.navbar2 {
+  margin-top: 18px;
+  display: flex;
+  list-style-type: none;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 100px;
+  background: var(--sh-surface-2);
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.navy2 {
+  font-family: var(--sh-font);
+  font-weight: 600;
+  color: var(--sh-muted);
+  font-size: 0.85rem;
+  margin: 0;
+  padding: 8px 18px;
+  border-radius: 100px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  display: inline-block;
+}
+
+.navy2 h1 { font: inherit; margin: 0; }
+
+.navy2:hover { font-size: 0.85rem; background-color: var(--sh-surface); color: var(--sh-accent-ink); box-shadow: var(--sh-shadow); }
+
+/* Auth / form cards ------------------------------------------------------- */
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 16px 60px;
+}
+
+.wrapper > .login-container,
+body > .login-container { align-items: center; }
+
+.login-box {
+  background-color: var(--sh-surface);
+  padding: 2.75rem 2.5rem;
+  border-radius: var(--sh-radius-lg);
+  box-shadow: var(--sh-shadow-lg);
+  border: 1px solid var(--sh-line);
+  text-align: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-header {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 1.75rem;
+  color: var(--sh-ink);
+}
+
+.input-field,
+.input-field2,
+.input-field3,
+select.input-field,
+.input-data {
+  width: 100%;
+  height: 3rem;
+  border: 1px solid var(--sh-line);
+  margin-bottom: 1.1rem;
+  border-radius: var(--sh-radius-sm);
+  padding: 0 1rem;
+  font-size: 1rem;
+  background-color: var(--sh-surface-2);
+  color: var(--sh-ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.input-field2 { height: auto; min-height: 5.5rem; padding-top: 0.75rem; resize: vertical; }
+.input-data { height: 2.6rem; margin-bottom: 1rem; background-color: var(--sh-surface); }
+
+.input-field:focus,
+.input-field2:focus,
+.input-field3:focus,
+select.input-field:focus,
+.input-data:focus {
+  outline: none;
+  background-color: var(--sh-surface);
+  border-color: var(--sh-accent);
+  box-shadow: 0 0 0 3px var(--sh-accent-soft);
+}
+
+.input-field::placeholder, .input-field2::placeholder, .input-field3::placeholder { color: var(--sh-muted); }
+
+select.input-field, .input-field3 { appearance: auto; cursor: pointer; }
+.input-field3 option, .input-data option { color: var(--sh-ink); }
+
+.label-data {
+  position: static;
+  display: block;
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sh-muted);
+  text-align: start;
+}
+
+/* Buttons ------------------------------------------------------------------ */
+
+.btn-login,
+.btn-upload,
+.btn-msg,
+.btn-show,
+.update-button {
+  width: 100%;
+  height: 3rem;
+  border: none;
+  border-radius: var(--sh-radius-sm);
+  font-size: 1rem;
+  font-weight: 700;
+  background-color: var(--sh-accent);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-login:hover, .btn-upload:hover, .btn-msg:hover, .btn-show:hover, .update-button:hover {
+  background-color: var(--sh-accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-login a { color: inherit; text-decoration: none; }
+
+.btn-del, .update-delete {
+  width: 100%;
+  height: 2.75rem;
+  border: 1px solid var(--sh-danger);
+  border-radius: var(--sh-radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+  background-color: transparent;
+  color: var(--sh-danger);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-del:hover, .update-delete:hover { background-color: var(--sh-danger-soft); }
+
+.btn-login:focus-visible, .btn-upload:focus-visible, .btn-msg:focus-visible,
+.btn-show:focus-visible, .update-button:focus-visible, .btn-del:focus-visible,
+.update-delete:focus-visible, .navy:focus-visible, .navy2:focus-visible {
+  outline: 2px solid var(--sh-accent);
+  outline-offset: 2px;
+}
+
+.btn-share {
+  width: 3rem;
+  height: 3rem;
+  font-size: 1.3rem;
+  font-weight: normal;
+  border-radius: 50%;
+  color: var(--sh-muted);
+  background-color: var(--sh-surface-2);
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-share:hover { background-color: var(--sh-accent-soft); color: var(--sh-accent-ink); }
+
+.button-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.button-container .input-field { margin-bottom: 0; flex: 1; }
+
+/* Links ------------------------------------------------------------------ */
+
+.login-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+}
+
+.admin-link, .create-account-link {
+  color: var(--sh-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.admin-link:hover, .create-account-link:hover { color: var(--sh-accent-ink); }
+
+.message { color: var(--sh-danger); margin-bottom: 10px; font-size: 0.9rem; }
+.error-message { color: var(--sh-danger); font-weight: 600; margin-bottom: 10px; font-size: 0.9rem; }
+
+/* Page shell / card grid -------------------------------------------------- */
+
+.wrapper {
+  width: 100% !important;
+  max-width: 1080px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-bottom: 40px;
+}
+
+.container {
+  margin-top: 1.5rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+  padding: 0 20px;
+  background: transparent;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: 190px;
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius);
+  box-shadow: var(--sh-shadow);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover { height: auto; box-shadow: var(--sh-shadow-lg); transform: translateY(-2px); }
+
+.card .lines { display: none; }
+
+.card .title {
+  position: static;
+  transform: none;
+  font-family: var(--sh-font);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sh-accent-ink);
+  text-align: start;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.card .title span {
+  position: static;
+  transform: none;
+  display: block;
+  font-family: var(--sh-font);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sh-ink);
+  text-transform: none;
+  letter-spacing: normal;
+  margin-top: 4px;
+  text-align: start;
+}
+
+/* Flip-cover header (file card "ID card") -----------------------------------
+   A book-cover-style flip reveal on the card's title/category area: closed,
+   it shows the file title on a plain cover; on hover the cover flips open
+   (like turning a book cover) to reveal the category + icon underneath.
+   Clicking it opens the file, same as the Open button. */
+
+.card-flip {
+  position: relative;
+  width: 100%;
+  height: 92px;
+  margin-bottom: 12px;
+  border-radius: var(--sh-radius-sm);
+  perspective: 1200px;
+  cursor: pointer;
+}
+
+.card-flip-back {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: var(--sh-radius-sm);
+  background: var(--sh-accent-soft);
+}
+
+.card-flip-back .card-flip-icon {
+  font-size: 1.1rem;
+  color: var(--sh-accent);
+}
+
+.card-flip-back .card-flip-category {
+  font-family: var(--sh-font);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--sh-accent-ink);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.card-flip-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: var(--sh-radius-sm);
+  background: var(--sh-surface-2);
+  border: 1px solid var(--sh-line);
+  box-shadow: var(--sh-shadow);
+  transform-style: preserve-3d;
+  transform-origin: 0 center;
+  transition: transform 0.45s ease, box-shadow 0.45s ease;
+}
+
+.card-flip-cover span {
+  font-family: var(--sh-font);
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--sh-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-flip:hover .card-flip-cover,
+.card-flip:focus-visible .card-flip-cover,
+.card-flip.is-open .card-flip-cover {
+  transform: rotateY(-80deg);
+  box-shadow: none;
+}
+
+.card-flip:focus-visible { outline: 2px solid var(--sh-accent); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card-flip-cover { transition-duration: 0.01ms; }
+}
+
+.card .content {
+  position: static;
+  width: 100%;
+  height: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-top: 0;
+}
+
+.card .content .details {
+  width: 100%;
+  text-align: start;
+  transform: none;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card .content .details h2 {
+  font-family: var(--sh-font);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sh-ink);
+  line-height: 1.3;
+}
+
+.card .content .details h2 span {
+  font-family: var(--sh-font);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--sh-muted);
+}
+
+.card .content .details .info {
+  position: relative;
+  width: 100%;
+  padding: 0 0 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.card .content .details .info h3 {
+  font-size: 0.85rem;
+  color: var(--sh-muted);
+  line-height: 1.4;
+  font-weight: 400;
+  text-align: start;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* File description: shown on hover in place of the always-visible category
+   field above, instead of permanently taking up card space. Positioned to
+   exactly cover the .info box (category + uploader), so nothing else in the
+   card - the flip cover or the action buttons - is affected by the hover. */
+.card-description-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  padding: 2px 4px 2px 0;
+  background: var(--sh-surface);
+  font-size: 0.85rem;
+  color: var(--sh-ink);
+  line-height: 1.4;
+  text-align: start;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  overflow-y: auto;
+  z-index: 2;
+}
+
+.card:hover .card-description-overlay,
+.card:focus-within .card-description-overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-description-overlay { transition-duration: 0.01ms; }
+}
+
+.card .content .details .actions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.card .content .details .actions button {
+  min-width: unset;
+  padding: 7px 14px;
+  border: 1px solid var(--sh-line);
+  outline: none;
+  border-radius: 100px;
+  background: var(--sh-surface-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--sh-ink);
+  cursor: pointer;
+  opacity: 1;
+  transition: background-color 0.15s ease;
+}
+
+.card .content .details .actions button:hover {
+  opacity: 1;
+  transform: none;
+  background-color: var(--sh-accent-soft);
+  color: var(--sh-accent-ink);
+}
+
+.uploadby { color: var(--sh-muted); font-size: 0.78rem; margin: 0; }
+.uploadby strong { color: var(--sh-ink); }
+
+.editebutton {
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 14px;
+  left: auto;
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--sh-muted);
+  background: var(--sh-surface-2);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editebutton:hover { background: var(--sh-accent-soft); color: var(--sh-accent-ink); }
+
+/* Modals -------------------------------------------------------------------- */
+
+.modal, .modal-comment, .modal-message, .updateModal, .Modal, #updateModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(28, 36, 32, 0.5);
+  padding: 20px;
+  overflow-y: auto;
+  width: auto;
+  height: auto;
+  top: 0;
+  left: 0;
+  transform: none;
+  border: none;
+  box-shadow: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal[style*="display: block"], .modal-comment[style*="display: block"],
+.modal-message[style*="display: block"], .updateModal[style*="display: block"],
+#updateModal[style*="display: block"] {
+  display: flex !important;
+}
+
+.modal-content, .modal-content-m, .modal-content-up {
+  background: var(--sh-surface);
+  border-radius: var(--sh-radius-lg);
+  box-shadow: var(--sh-shadow-lg);
+  padding: 24px;
+  width: min(92vw, 420px);
+  max-height: 85vh;
+  overflow-y: auto;
+  margin: auto;
+  text-align: start;
+  color: var(--sh-ink);
+  border: none;
+}
+
+.modal-comment .modal-content { height: auto; }
+
+.modal-content-m h2, .updateModal h1, .Modal h1 {
+  margin-top: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--sh-ink);
+  font-family: var(--sh-font);
+}
+
+.modal-content-m p { margin: 10px 0 18px; font-size: 0.95rem; color: var(--sh-muted); }
+.modal-content-m div { display: flex; gap: 10px; }
+.modal-content-m button, .modal-content-up button { flex: 1; }
+
+.close {
+  align-self: flex-end;
+  font-size: 20px;
+  color: var(--sh-muted);
+  cursor: pointer;
+  float: none;
+}
+
+.close:hover, .close:focus { color: var(--sh-ink); }
+
+.chat-history { flex: 1; overflow-y: auto; margin-bottom: 10px; font-size: 14px; color: var(--sh-ink); max-height: 45vh; }
+.chat-item { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--sh-line); }
+.chat-item:last-child { border-bottom: none; }
+.chat-item strong { color: var(--sh-accent-ink); }
+.chat-date { font-size: 12px; color: var(--sh-muted); }
+hr { border: none; border-top: 1px solid var(--sh-line); }
+
+.chat-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius-sm);
+  resize: vertical;
+  font-family: var(--sh-font);
+}
+
+.chat-button {
+  width: 100%;
+  padding: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  background-color: var(--sh-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--sh-radius-sm);
+  cursor: pointer;
+}
+
+.chat-button:hover { background-color: var(--sh-accent-hover); }
+
+.modal-msg {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--sh-ink);
+  z-index: 1002;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 100px;
+  display: none;
+  color: #fff;
+}
+
+button#confirmDeleteBtn { background-color: var(--sh-danger); color: #fff; }
+button#cancelDeleteBtn { background-color: var(--sh-surface-2); color: var(--sh-ink); }
+button#confirmDeleteBtn, button#cancelDeleteBtn {
+  border: none; border-radius: var(--sh-radius-sm); padding: 10px 16px; cursor: pointer; font-weight: 600;
+}
+
+/* Chat inbox (chat.html) --------------------------------------------------- */
+
+.container-msg, .container-msg2 {
+  width: 100%;
+  max-width: 640px;
+  margin: 16px auto;
+  padding: 16px;
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius);
+  box-shadow: var(--sh-shadow);
+  float: none;
+}
+
+.msg-item {
+  background: var(--sh-surface-2);
+  padding: 14px;
+  margin: 10px 0;
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius-sm);
+}
+
+.msg-item p { margin: 4px 0; color: var(--sh-ink); }
+.msg-item .msg-date, .message-date { font-size: 12px; color: var(--sh-muted); }
+.message-card { background: var(--sh-surface-2); padding: 14px; margin: 10px 0; border-radius: var(--sh-radius-sm); }
+
+/* Message bubbles (direct chat + AI Study Buddy) --------------------------
+   Shared "conversation thread" component: a scrollable column of rows, each
+   holding one bubble aligned to whichever side the message belongs to
+   (sent = mine, received = theirs), Telegram/WhatsApp-style. Used by
+   chat.html (user-to-user messaging) and ai-buddy.html (AI conversation). */
+
+.msg-thread {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  scroll-behavior: smooth;
+}
+
+.msg-bubble-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 100%;
+  animation: sh-page-fade-in 0.25s ease both;
+}
+
+.msg-bubble-row.is-sent { justify-content: flex-end; }
+.msg-bubble-row.is-received { justify-content: flex-start; }
+
+.msg-avatar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sh-accent-soft);
+  color: var(--sh-accent-ink);
+  font-size: 0.9rem;
+}
+
+.msg-bubble {
+  max-width: min(72%, 480px);
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--sh-ink);
+  box-shadow: var(--sh-shadow);
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.is-received .msg-bubble {
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-bottom-left-radius: 4px;
+}
+
+.is-sent .msg-bubble {
+  background: var(--sh-accent);
+  color: var(--sh-accent-ink);
+  border-bottom-right-radius: 4px;
+}
+
+:root:not([data-theme="light"]) .is-sent .msg-bubble { color: #0d140f; }
+:root[data-theme="dark"] .is-sent .msg-bubble { color: #0d140f; }
+
+.msg-bubble-time {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.68rem;
+  opacity: 0.7;
+  text-align: right;
+}
+
+.is-received .msg-bubble-time { text-align: left; }
+
+.msg-bubble.is-typing { display: flex; align-items: center; gap: 4px; padding: 12px 16px; }
+.msg-bubble.is-typing .msg-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sh-muted);
+  animation: sh-bounce 1.3s infinite ease-in-out both;
+}
+.msg-bubble.is-typing .msg-dot:nth-child(2) { animation-delay: -0.16s; }
+.msg-bubble.is-typing .msg-dot:nth-child(3) { animation-delay: -0.08s; }
+
+@keyframes sh-bounce {
+  0%, 80%, 100% { transform: scale(0.4); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Chat shell (Telegram-style two-column messaging UI, chat.html) ----------- */
+
+.chat-shell {
+  display: flex;
+  width: 100%;
+  max-width: 1080px;
+  margin: 20px auto 40px;
+  height: 74vh;
+  min-height: 440px;
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius);
+  box-shadow: var(--sh-shadow);
+  overflow: hidden;
+  background: var(--sh-surface);
+}
+
+.chat-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--sh-line);
+  background: var(--sh-surface-2);
+}
+
+.chat-sidebar-header {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--sh-line);
+}
+
+.chat-sidebar-header h2 { margin: 0 0 10px; font-size: 1.05rem; color: var(--sh-ink); }
+
+.chat-search {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--sh-radius-sm);
+  border: 1px solid var(--sh-line);
+  background: var(--sh-surface);
+  color: var(--sh-ink);
+  font-size: 0.85rem;
+  outline: none;
+}
+.chat-search:focus { border-color: var(--sh-accent); }
+
+.chat-list { flex: 1; overflow-y: auto; }
+
+.chat-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--sh-line);
+  transition: background-color 0.15s ease;
+}
+.chat-list-item:hover, .chat-list-item.is-active { background: var(--sh-accent-soft); }
+
+.chat-list-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sh-accent-soft);
+  color: var(--sh-accent-ink);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.chat-list-body { flex: 1; min-width: 0; }
+.chat-list-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.chat-list-name { font-weight: 600; color: var(--sh-ink); font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-list-time { font-size: 0.7rem; color: var(--sh-muted); flex-shrink: 0; }
+.chat-list-preview { font-size: 0.8rem; color: var(--sh-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.chat-list-empty { padding: 30px 18px; text-align: center; color: var(--sh-muted); font-size: 0.85rem; }
+
+.chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+.chat-main-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--sh-line); }
+.chat-main-back { display: none; background: none; border: none; color: var(--sh-ink); font-size: 1.15rem; cursor: pointer; padding: 4px; }
+.chat-main-title { font-weight: 600; color: var(--sh-ink); }
+
+.chat-main-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--sh-muted); text-align: center; padding: 30px; font-size: 0.9rem; }
+
+.chat-main-form { display: flex; gap: 10px; align-items: center; padding: 14px 18px; border-top: 1px solid var(--sh-line); }
+
+@media (max-width: 760px) {
+  .chat-shell { height: 80vh; border-radius: 0; margin: 0; max-width: 100%; }
+  .chat-sidebar { width: 100%; }
+  .chat-main { display: none; }
+  .chat-shell.is-thread-open .chat-sidebar { display: none; }
+  .chat-shell.is-thread-open .chat-main { display: flex; }
+  .chat-main-back { display: inline-flex; }
+}
+
+/* Toast (kept compatible with toast.css, refined to the new palette) ------- */
+
+.toast-notification { background-color: var(--sh-ink) !important; border-radius: 100px !important; }
+.toast-notification.success { background-color: var(--sh-success) !important; }
+.toast-notification.error { background-color: var(--sh-danger) !important; }
+.toast-notification.warning { background-color: var(--sh-warning) !important; }
+.toast-notification.info { background-color: #2f6fb3 !important; }
+
+/* Responsive --------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+  .login-box { padding: 2rem 1.5rem; }
+  .navbar { gap: 2px; padding: 6px; }
+  .navy { width: 38px; height: 38px; }
+  .container { grid-template-columns: 1fr; padding: 0 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* ===========================================================================
+   Two-sided file card (public/js/fileCard.js)
+   ---------------------------------------------------------------------------
+   Replaces the old .card-flip "book cover" header. That version showed the
+   category behind a hover-flipped cover AND again as the <h3> of the info
+   block below it, so the same word appeared twice on one card while the
+   description had almost no room.
+
+   Now the card itself is the flip: FRONT = category + title (what the file
+   is), BACK = uploader, description and actions (what you can do with it).
+   A click - anywhere on the card, or on the explicit Details/Back button -
+   swaps between them.
+
+   A 3D flip needs both faces stacked in the same box, which means the card
+   needs a real height rather than `height: auto`. The back face scrolls
+   internally so a long description cannot burst out of it.
+   ========================================================================= */
+
+.card.flip-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  overflow: visible;
+  height: 290px;
+  min-height: 0;
+  perspective: 1400px;
+  cursor: pointer;
+  display: block;
+}
+
+.card.flip-card:hover { transform: none; box-shadow: none; }
+.card.flip-card:focus-visible { outline: 2px solid var(--sh-accent); outline-offset: 4px; border-radius: var(--sh-radius); }
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.flip-card.is-flipped .flip-card-inner { transform: rotateY(180deg); }
+
+.flip-card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border-radius: var(--sh-radius);
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  box-shadow: var(--sh-shadow);
+  /* Without this the reverse side shows through, mirrored. */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.flip-card:hover .flip-card-face { box-shadow: var(--sh-shadow-lg); }
+
+.flip-card-back { transform: rotateY(180deg); }
+
+/* --- front ---------------------------------------------------------- */
+
+.flip-card-front .card-flip-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 5px 12px;
+  border-radius: 100px;
+  background: var(--sh-accent-soft);
+  color: var(--sh-accent-ink);
+  font-family: var(--sh-font);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flip-card-front .card-flip-icon { font-size: 0.85rem; color: var(--sh-accent); flex-shrink: 0; }
+
+.flip-card-title {
+  margin: 16px 0 0;
+  font-family: var(--sh-font);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--sh-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.flip-card-uploader {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--sh-muted);
+}
+
+/* --- back ----------------------------------------------------------- */
+
+.flip-card-back-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-inline-end: 4px;
+}
+
+.flip-card-back .uploadby {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  color: var(--sh-muted);
+}
+
+.flip-card-back .card-description-overlay {
+  position: static;
+  opacity: 1;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--sh-ink);
+  background: none;
+  padding: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.flip-card-back .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--sh-line);
+}
+
+.flip-card-back .actions button {
+  font-family: var(--sh-font);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--sh-line);
+  background: var(--sh-surface-2);
+  color: var(--sh-ink);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.flip-card-back .actions button:hover {
+  background: var(--sh-accent-soft);
+  border-color: var(--sh-accent);
+  color: var(--sh-accent-ink);
+}
+
+/* Icon-only card actions (favourite, AI summary).
+   Square rather than pill, so an icon sits in the middle of a circle instead
+   of floating in a stretched capsule. */
+.flip-card-back .actions button.card-action-icon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease,
+              transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* The label stays in the DOM for assistive tech and disappears from view.
+   Not display:none - a hidden-but-present label is what a screen reader and a
+   translation tool both expect to find. */
+.card-action-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- favourite button ------------------------------------------------
+   It had no hover of its own: it inherited the same flat wash as "Open" and
+   "Chat", so there was nothing to say it was the bookmark. It now fills with
+   the bookmark amber, lifts off the card, and the icon itself nudges upward
+   the way a bookmark slides into a page. */
+.card-fav-btn {
+  color: var(--sh-muted);
+}
+
+.card-fav-btn i {
+  transition: transform 0.18s ease;
+}
+
+.flip-card-back .actions button.card-fav-btn:hover,
+.flip-card-back .actions button.card-fav-btn:focus-visible {
+  background: var(--sh-fav-soft);
+  border-color: var(--sh-fav);
+  color: var(--sh-fav-ink);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px var(--sh-fav-shadow);
+}
+
+.card-fav-btn:hover i,
+.card-fav-btn:focus-visible i {
+  transform: translateY(-2px) scale(1.12);
+}
+
+.flip-card-back .actions button.card-fav-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* The press acknowledgement, added by fileCard.js for one animation cycle. */
+.card-fav-btn.is-pressed {
+  animation: sh-fav-pop 0.42s ease;
+}
+
+.card-fav-btn.is-pressed i {
+  animation: sh-fav-drop 0.42s ease;
+}
+
+@keyframes sh-fav-pop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+@keyframes sh-fav-drop {
+  0%   { transform: translateY(-6px); opacity: 0.4; }
+  60%  { transform: translateY(2px); opacity: 1; }
+  100% { transform: translateY(0); }
+}
+
+/* --- AI summary button ----------------------------------------------- */
+.card-ai-btn {
+  color: var(--sh-accent);
+}
+
+.card-ai-icon {
+  width: 1.05em;
+  height: 1.05em;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.flip-card-back .actions button.card-ai-btn:hover,
+.flip-card-back .actions button.card-ai-btn:focus-visible {
+  background: var(--sh-accent-soft);
+  border-color: var(--sh-accent);
+  color: var(--sh-accent-ink);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px var(--sh-accent-shadow);
+}
+
+.card-ai-btn:hover .card-ai-icon,
+.card-ai-btn:focus-visible .card-ai-icon {
+  transform: rotate(-12deg) scale(1.14);
+}
+
+/* --- busy state -------------------------------------------------------
+   Used while the summary request is in flight. The old code overwrote the
+   button's text with "Thinking..." and put it back afterwards, which worked
+   for a button whose whole content was a word - and would have erased the
+   icon permanently for one whose content is a glyph. Nothing is replaced
+   now: the content is hidden and a spinner is drawn over it. */
+.btn-busy {
+  position: relative;
+  pointer-events: none;
+  color: transparent !important;
+}
+
+.btn-busy > * {
+  visibility: hidden;
+}
+
+.btn-busy::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 15px;
+  height: 15px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid var(--sh-line);
+  border-top-color: var(--sh-accent);
+  border-radius: 50%;
+  animation: sh-btn-spin 0.7s linear infinite;
+}
+
+@keyframes sh-btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-fav-btn.is-pressed,
+  .card-fav-btn.is-pressed i,
+  .card-action-icon,
+  .card-ai-icon,
+  .card-fav-btn i { animation: none; transition: none; }
+  .btn-busy::after { animation-duration: 2.4s; }
+}
+
+/* --- shared controls ------------------------------------------------- */
+
+.flip-card-toggle {
+  align-self: flex-start;
+  margin-top: 12px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--sh-accent);
+  font-family: var(--sh-font);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flip-card-toggle:hover { text-decoration: underline; }
+.flip-card-front .flip-card-toggle { margin-top: auto; }
+
+.flip-card-corner {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--sh-line);
+  background: var(--sh-surface-2);
+  color: var(--sh-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.flip-card-corner:hover { background: var(--sh-accent-soft); color: var(--sh-accent-ink); }
+
+/* The corner bookmark on the Favourites page REMOVES the file. Hovering it in
+   the same friendly accent green as "edit" gave no hint of that, so it turns
+   danger-red and the bookmark tips out of the page. */
+.flip-card-corner[data-action="unfavorite"] {
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.flip-card-corner[data-action="unfavorite"]:hover,
+.flip-card-corner[data-action="unfavorite"]:focus-visible {
+  background: var(--sh-danger-soft);
+  border-color: var(--sh-danger);
+  color: var(--sh-danger);
+  transform: scale(1.08);
+}
+
+.flip-card-corner[data-action="unfavorite"] i {
+  transition: transform 0.18s ease;
+}
+
+.flip-card-corner[data-action="unfavorite"]:hover i {
+  transform: translateY(2px) rotate(8deg);
+}
+
+.cards-empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 20px;
+  color: var(--sh-muted);
+  text-align: center;
+}
+
+.cards-empty-state i { font-size: 2rem; opacity: 0.5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-card-inner { transition-duration: 0.01ms; }
+}
+
+/* ===========================================================================
+   Shared navigation bar - three zones (public/js/nav.js)
+   ---------------------------------------------------------------------------
+       [ account ]     [ browse - browse - browse ]     [ AR/EN  logout ]
+   The account control and the sign-out control are separated from the page
+   navigation and pushed to opposite ends, so the middle of the bar is only
+   the places you can go. A 1fr / auto / 1fr grid keeps the centre group
+   optically centred no matter how wide the two side groups are.
+   ========================================================================= */
+
+.navbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  width: min(720px, calc(100% - 32px));
+  padding: 8px 12px;
+}
+
+.navbar-zone {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.navbar-start { justify-content: flex-start; }
+.navbar-centre { justify-content: center; }
+.navbar-end { justify-content: flex-end; }
+
+/* A hairline between each side group and the navigation, so the split reads
+   as deliberate rather than as uneven spacing. */
+.navbar-centre {
+  padding-inline: 10px;
+  border-inline: 1px solid var(--sh-line);
+}
+
+.navbar button.navy {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--sh-font);
+}
+
+.navbar .navy-account {
+  color: var(--sh-accent-ink);
+  background: var(--sh-accent-soft);
+}
+
+.navbar .navy-account:hover { background: var(--sh-accent); color: #fff; }
+
+.navbar .navy-logout { color: var(--sh-danger); }
+.navbar .navy-logout:hover { background: var(--sh-danger-soft); color: var(--sh-danger); }
+
+.navbar a.navy.is-current {
+  color: var(--sh-accent-ink);
+  background: var(--sh-accent-soft);
+}
+
+@media (max-width: 560px) {
+  .navbar { gap: 4px; padding: 6px; }
+  .navbar-centre { padding-inline: 4px; gap: 0; }
+  .navy { width: 36px; height: 36px; font-size: 0.95rem; }
+}
+
+/* ===========================================================================
+   Right-to-left (Arabic)
+   ---------------------------------------------------------------------------
+   i18n.js sets `dir="rtl"` on <html> when Arabic is selected. Most of this
+   stylesheet already uses logical properties (inset-inline, padding-inline,
+   text-align: start), which mirror on their own. What follows covers the
+   places that cannot mirror automatically:
+
+     - directional ICONS. An arrow is a picture, not a layout box, so a
+       "back" arrow keeps pointing left in RTL and reads as "forward". They
+       are flipped horizontally instead.
+     - the display TYPEFACE. "Lucida Handwriting" has no Arabic glyphs, so
+       the heading would fall back to some arbitrary installed face; an
+       Arabic-capable stack is used for the heading in RTL.
+   ========================================================================= */
+
+[dir="rtl"] .texth,
+[dir="rtl"] .textl {
+  font-family: "Segoe UI", "Noto Naskh Arabic", "Traditional Arabic", Tahoma, Arial, sans-serif;
+  letter-spacing: 0;
+}
+
+/* Arabic has no capital letters, so uppercasing does nothing but it can widen
+   the letter-spacing rules applied alongside it. */
+[dir="rtl"] .card-flip-category,
+[dir="rtl"] .card .title {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[dir="rtl"] .fa-arrow-left,
+[dir="rtl"] .fa-arrow-right,
+[dir="rtl"] .chat-main-back .fa-arrow-left,
+[dir="rtl"] .flip-card-toggle .fa-arrow-right-arrow-left {
+  transform: scaleX(-1);
+}
+
+/* The message bubbles read from the correct edge on their own (flex-end
+   mirrors), but the little timestamp inside a received bubble is aligned with
+   a physical keyword upstream. */
+[dir="rtl"] .is-received .msg-bubble-time { text-align: right; }
+[dir="rtl"] .is-sent .msg-bubble-time { text-align: left; }
+
+/* Modal panels that slide in from a physical side. */
+[dir="rtl"] .modal { right: auto; left: 0; box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3); }
+[dir="rtl"] .close { align-self: flex-start; }
+
+/* Latin file names, usernames and URLs inside otherwise-Arabic text keep
+   their own direction, so "notes_v2.pdf" does not come out reversed. */
+[dir="rtl"] .flip-card-title,
+[dir="rtl"] .chat-list-name,
+[dir="rtl"] .uploadby {
+  unicode-bidi: plaintext;
+}
+
+
+/* ===========================================================================
+   Language switch, pinned to the top of every page (public/js/i18n.js)
+   ---------------------------------------------------------------------------
+   Moved out of the navigation bar. Two reasons: choosing a language is a
+   setting for the whole site rather than a place to navigate to, and the
+   pages that have no navbar - the splash page, login, create-account - could
+   not show it at all while it lived there.
+
+   `inset-inline-start: auto / inset-inline-end: 0` puts it in the top OUTER
+   corner: right in English, left in Arabic, without a separate RTL rule.
+   ========================================================================= */
+
+.sh-lang-bar {
+  position: fixed;
+  top: 12px;
+  inset-inline-end: 16px;
+  z-index: 1200;
+  /* The bar itself must not swallow clicks meant for the page behind it. */
+  pointer-events: none;
+}
+
+.sh-lang-bar .lang-toggle-btn {
+  pointer-events: auto;
+  min-width: 58px;
+  padding: 7px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--sh-line);
+  background: var(--sh-surface);
+  color: var(--sh-ink);
+  font-family: var(--sh-font);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--sh-shadow);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.sh-lang-bar .lang-toggle-btn:hover {
+  background: var(--sh-accent-soft);
+  color: var(--sh-accent-ink);
+  transform: translateY(-1px);
+}
+
+.sh-lang-bar .lang-toggle-btn:focus-visible {
+  outline: 2px solid var(--sh-accent);
+  outline-offset: 2px;
+}
+
+/* The file viewer fills the whole window and has its own dark furniture, so
+   the switch needs to read against a document page rather than the app's
+   background. */
+.pdf-container ~ .sh-lang-bar .lang-toggle-btn,
+body:has(.pdf-container) .sh-lang-bar .lang-toggle-btn {
+  background: #1c2420;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 560px) {
+  .sh-lang-bar { top: 8px; inset-inline-end: 8px; }
+  .sh-lang-bar .lang-toggle-btn { min-width: 50px; padding: 6px 11px; font-size: 0.72rem; }
+}
+
+/* Summary dialog (public/js/aiSummary.js) ---------------------------------
+   Was an inline style-attribute block built inside file-page-forme.html, so
+   it existed on one page only and ignored the theme entirely (hardcoded
+   white). */
+
+.ai-summary-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(12, 18, 15, 0.55);
+}
+
+.ai-summary-panel {
+  position: relative;
+  width: min(640px, 100%);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 28px;
+  border-radius: var(--sh-radius);
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  box-shadow: var(--sh-shadow-lg);
+}
+
+.ai-summary-close {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 14px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--sh-surface-2);
+  color: var(--sh-ink);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ai-summary-close:hover { background: var(--sh-accent-soft); color: var(--sh-accent-ink); }
+
+.ai-summary-title {
+  margin: 0 0 4px;
+  font-family: var(--sh-font);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--sh-ink);
+}
+
+.ai-summary-file {
+  margin: 0 0 16px;
+  font-size: 0.82rem;
+  color: var(--sh-muted);
+  overflow-wrap: anywhere;
+}
+
+.ai-summary-body {
+  white-space: pre-wrap;
+  line-height: 1.65;
+  font-size: 0.95rem;
+  color: var(--sh-ink);
+  overflow-wrap: anywhere;
+}
+
+/* AI error bubble (ai-buddy.html) ------------------------------------------
+   An AI failure is not a chat reply, and styling it as one made "the AI
+   service returned an error" look like something the assistant had said.
+   The underlying cause sits in a collapsed <details> so it is one click away
+   instead of only in the server's terminal. */
+
+.msg-bubble.msg-bubble-error {
+  background: var(--sh-danger-soft);
+  color: var(--sh-danger);
+  border: 1px solid var(--sh-danger);
+}
+
+.msg-error-detail {
+  margin-top: 10px;
+  font-size: 0.78rem;
+}
+
+.msg-error-detail summary {
+  cursor: pointer;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.msg-error-detail pre {
+  margin: 8px 0 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--sh-surface);
+  color: var(--sh-ink);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+/* ===========================================================================
+   Search results summary (public/js/search.js)
+   A result list with no header cannot tell "nothing matched" apart from "the
+   page has not searched yet", and gives no clue that a fuzzy fallback was
+   used. This line says how many, for what, and how confident.
+   ======================================================================== */
+
+.search-summary {
+  max-width: 1100px;
+  margin: 0 auto 4px;
+  padding: 0 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--sh-font);
+  font-size: 0.9rem;
+  color: var(--sh-muted);
+}
+
+.search-summary[hidden] { display: none; }
+
+.search-summary-count {
+  font-weight: 700;
+  color: var(--sh-ink);
+}
+
+.search-summary-term {
+  color: var(--sh-accent);
+  font-weight: 600;
+}
+
+.search-summary-note {
+  flex-basis: 100%;
+  font-size: 0.82rem;
+  color: var(--sh-warning);
+}
+
+/* Category + "Related" sit on one line. The card face is a flex column, so a
+   bare chip stretched to the full card width and dropped onto its own row. */
+.card-flip-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* "Related" chip - a search result that came from the embedding index rather
+   than from a word match. It sits next to the category on the card front. */
+.card-related-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--sh-accent-soft);
+  color: var(--sh-accent-ink);
+  border: 1px solid var(--sh-accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  cursor: help;
+}
+
+.card-chip-icon {
+  width: 0.95em;
+  height: 0.95em;
+  display: block;
+  flex: none;
+}
+
+/* ===========================================================================
+   "Recommended for You" strip (public/views/file-page-forme.html)
+   Was a row of inline-styled purple gradient boxes on the old dashboard,
+   using a colour that appears nowhere else in the app. Rebuilt on the design
+   tokens so it belongs to the same product as everything around it, and as
+   real <button>s so it is reachable by keyboard.
+   ======================================================================== */
+
+.reco-strip {
+  max-width: 1100px;
+  margin: 0 auto 18px;
+  padding: 0 24px;
+}
+
+.reco-strip[hidden] { display: none; }
+
+.reco-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-family: var(--sh-font);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sh-ink);
+}
+
+.reco-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.reco-card {
+  font-family: var(--sh-font);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--sh-accent-ink);
+  background: var(--sh-accent-soft);
+  border: 1px solid var(--sh-line);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease,
+              transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.reco-card:hover,
+.reco-card:focus-visible {
+  border-color: var(--sh-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px var(--sh-accent-shadow);
+}
+
+.reco-card:active { transform: translateY(0); box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reco-card { transition: none; }
+}

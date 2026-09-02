@@ -1,0 +1,210 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>My Profile - Student Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+
+
+  <link rel="stylesheet" href="../css/design-system.css">
+  <link rel="stylesheet" href="../css/toast.css">
+  <script src="../js/toast.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/fileCard.js"></script>
+  <script src="../js/aiSummary.js"></script>
+</head>
+<header class="header">
+  <h1 class="texth justify-center">Student Helper</h1>
+
+</header>
+
+<body>
+  <div>
+    <nav class="navbar">
+      <a href="/views/profile.html" class="navy" title="Profile"><i class="fa fa-user-circle" aria-hidden="false"></i></a>
+      <a href="/views/chat.html" class="navy" title="Messages"><i class="fa-solid fa-comments"></i></a>
+      <a href="/views/ai-buddy.html" class="navy" title="AI Study Buddy" data-i18n-title="nav.aiBuddy" data-i18n-aria="nav.aiBuddy"><i class="fas fa-robot"></i></a>
+      <a href="/views/add-file.html" class="navy" title="Add a file"><i class="fa fa-plus-square" aria-hidden="false"></i></a>
+      <a href="/views/File-page.html" class="navy" title="Files"><i class="fa fa-file" aria-hidden="false"></i></a>
+      <a href="/views/favorite.html" class="navy" title="Favourites"><i class="fa fa-bookmark" aria-hidden="false"></i></a>
+    </nav>
+  </div>
+
+  <div class="login-container">
+    <div class="login-box">
+      <h1 class="login-header" data-i18n="profile.header">Profile Account</h1>
+
+      <!-- Read-only account details. These are shown for reference; the
+           editable action on this page is the password change below. -->
+      <input type="hidden" id="userId" name="userId" />
+      <input type="text" class="input-field" id="name" name="name" placeholder="Name" data-i18n-placeholder="profile.name" readonly>
+      <input type="text" class="input-field" id="email" name="email" placeholder="Email" data-i18n-placeholder="profile.email" readonly>
+      <input type="text" class="input-field" id="username" name="username" placeholder="Users name" data-i18n-placeholder="profile.username" readonly>
+
+      <hr style="margin:22px 0; border:none; border-top:1px solid var(--sh-line);">
+
+      <!-- Change password. The "Change" button used to sit on a form wired to
+           nothing at all - there was no way for a user to change their own
+           password anywhere in the app. -->
+      <h2 style="font-size:1rem; font-weight:700; margin-bottom:12px; color:var(--sh-ink);">
+        <span data-i18n="profile.changeHeading">Change password</span>
+      </h2>
+      <form id="changePasswordForm">
+        <input type="password" class="input-field" id="currentPassword" name="currentPassword"
+               placeholder="Current password" data-i18n-placeholder="profile.current" autocomplete="current-password" required>
+        <input type="password" class="input-field" id="newPassword" name="newPassword"
+               placeholder="New password" data-i18n-placeholder="profile.new" autocomplete="new-password" required>
+        <input type="password" class="input-field" id="confirmPassword" name="confirmPassword"
+               placeholder="Confirm new password" data-i18n-placeholder="profile.confirm" autocomplete="new-password" required>
+        <button type="submit" class="btn-login" data-i18n="profile.changeButton">Change password</button>
+      </form>
+
+      <hr style="margin:22px 0; border:none; border-top:1px solid var(--sh-line);">
+
+      <!-- Delete account. Also entirely absent before: only an admin could
+           remove an account, so a user could not leave on their own terms. -->
+      <h2 style="font-size:1rem; font-weight:700; margin-bottom:6px; color:var(--sh-danger);">
+        <span data-i18n="profile.deleteHeading">Delete account</span>
+      </h2>
+      <p style="font-size:12px; color:var(--sh-muted); margin-bottom:12px;">
+        <span data-i18n="profile.deleteWarning">This permanently deletes your account and every file, comment, favourite and message attached to it. It cannot be undone.</span>
+      </p>
+      <form id="deleteAccountForm">
+        <input type="password" class="input-field" id="deletePassword" name="password"
+               placeholder="Confirm your password" data-i18n-placeholder="profile.deleteConfirmField" autocomplete="current-password" required>
+        <button type="submit" class="btn-del" data-i18n="profile.deleteButton">Delete my account permanently</button>
+      </form>
+
+    </div>
+  </div>
+  <script>
+    // Was fetching `/profile`, which serves this very HTML page - so
+    // response.json() threw a SyntaxError and not a single field was ever
+    // populated. `/profile-data` is the actual JSON endpoint
+    // (fileRoutes -> fileController.getProfile).
+    fetch('/profile-data')
+      .then(response => {
+        if (!response.ok) throw new Error(`Could not load profile (${response.status})`);
+        return response.json();
+      })
+      .then(user => {
+        document.querySelector('#userId').value = user.userId ?? '';
+        document.querySelector('#name').value = user.name ?? '';
+        document.querySelector('#email').value = user.email ?? '';
+        document.querySelector('#username').value = user.username ?? '';
+        // #password is deliberately left blank: the server does not send the
+        // stored hash, and prefilling it would place credentials in the DOM.
+      })
+      .catch(error => {
+        console.error('Error loading profile:', error);
+        if (typeof showToast === 'function') {
+          showToast(t('profile.loadError', 'Could not load your profile.'), 'error');
+        }
+      });
+
+    function notify(message, type) {
+      if (typeof showToast === 'function') showToast(message, type);
+      else alert(message);
+    }
+
+    // --- Change password -------------------------------------------------
+    document.getElementById('changePasswordForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      // Checked here purely for a fast, clear message; the server enforces
+      // the real rules (current password correct, strength, not reused).
+      if (newPassword !== confirmPassword) {
+        notify(t('profile.mismatch', 'The two new passwords do not match.'), 'warning');
+        return;
+      }
+
+      const button = event.target.querySelector('button[type=submit]');
+      button.disabled = true;
+
+      try {
+        const response = await fetch('/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          notify(data.message || 'Password changed successfully.', 'success');
+          event.target.reset();
+        } else {
+          notify(data.message || 'Could not change your password.', 'error');
+        }
+      } catch (error) {
+        console.error('Error changing password:', error);
+        notify(t('profile.noServer', 'Could not reach the server.'), 'error');
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    // --- Delete account --------------------------------------------------
+    document.getElementById('deleteAccountForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      // Deliberately a blocking confirm: this is irreversible and takes the
+      // user's files with it.
+      const confirmed = window.confirm(
+        'This permanently deletes your account and all of your files, comments, ' +
+        'favourites and messages.\n\nThis cannot be undone. Are you sure?'
+      );
+      if (!confirmed) return;
+
+      const password = document.getElementById('deletePassword').value;
+      const button = event.target.querySelector('button[type=submit]');
+      button.disabled = true;
+
+      try {
+        const response = await fetch('/delete-account', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          alert(data.message || 'Your account has been deleted.');
+          window.location.href = '/';
+        } else {
+          notify(data.message || 'Could not delete your account.', 'error');
+        }
+      } catch (error) {
+        console.error('Error deleting account:', error);
+        notify('Could not reach the server.', 'error');
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+
+</html>

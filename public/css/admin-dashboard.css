@@ -1,0 +1,269 @@
+/* Admin dashboard - page-scoped styles (prefixed .adm-*) that draw only on
+   design-system.css's --sh-* tokens, so dark/light mode works for free and
+   nothing here can collide with the shared classes. Mirrors the pattern
+   used by splash.css. */
+
+.adm-page {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px 20px 60px;
+}
+
+.adm-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.adm-topbar .textl { justify-content: flex-start; }
+
+.adm-logout-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  background: var(--sh-surface-2);
+  color: var(--sh-ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--sh-line);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.adm-logout-link:hover { background: var(--sh-danger-soft); color: var(--sh-danger); }
+
+.adm-section {
+  margin-top: 32px;
+}
+
+.adm-section-title {
+  font-family: var(--sh-font);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--sh-ink);
+  margin: 0 0 14px;
+}
+
+/* Stat tiles --------------------------------------------------------------- */
+
+.adm-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.adm-stat-tile {
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius);
+  box-shadow: var(--sh-shadow);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.adm-stat-icon {
+  color: var(--sh-accent);
+  font-size: 1.1rem;
+}
+
+.adm-stat-value {
+  font-family: var(--sh-font);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--sh-ink);
+  line-height: 1;
+}
+
+.adm-stat-value.is-loading {
+  color: var(--sh-muted);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.adm-stat-label {
+  color: var(--sh-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Charts --------------------------------------------------------------------- */
+
+.adm-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.adm-chart-card {
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius);
+  box-shadow: var(--sh-shadow);
+  padding: 20px;
+}
+
+.adm-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.adm-chart-title {
+  font-family: var(--sh-font);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sh-ink);
+  margin: 0;
+}
+
+.adm-chart-toggle {
+  background: none;
+  border: 1px solid var(--sh-line);
+  color: var(--sh-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.adm-chart-toggle:hover { background: var(--sh-accent-soft); color: var(--sh-accent-ink); }
+
+.adm-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adm-bar-row {
+  display: grid;
+  grid-template-columns: minmax(70px, 110px) 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.adm-bar-label {
+  font-size: 0.82rem;
+  color: var(--sh-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adm-bar-track {
+  background: var(--sh-surface-2);
+  border-radius: 100px;
+  height: 14px;
+  overflow: hidden;
+  display: block;
+}
+
+.adm-bar-fill {
+  display: block;
+  height: 100%;
+  min-width: 6px;
+  border-radius: 100px;
+  background: var(--sh-accent);
+  transition: background-color 0.15s ease, filter 0.15s ease;
+}
+
+.adm-bar-fill:hover { filter: brightness(1.08); }
+
+.adm-bar-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--sh-muted);
+  min-width: 20px;
+  text-align: right;
+}
+
+.adm-chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.adm-chart-table th, .adm-chart-table td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--sh-line);
+  color: var(--sh-ink);
+}
+
+.adm-chart-table th { color: var(--sh-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+
+/* Management (users / files) ------------------------------------------------- */
+
+.adm-management-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.adm-management-actions .btn-show { width: auto; padding: 0 20px; height: 2.75rem; }
+
+.adm-card-grid {
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.1rem;
+}
+
+.user-card, .file-card {
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: var(--sh-radius);
+  box-shadow: var(--sh-shadow);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.user-card:hover, .file-card:hover { box-shadow: var(--sh-shadow-lg); transform: translateY(-2px); }
+
+.user-card p, .file-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--sh-muted);
+}
+
+.user-card p strong, .file-card p strong { color: var(--sh-ink); }
+
+.user-card .btn-del, .file-card .btn-del {
+  margin-top: 10px;
+  width: auto;
+  align-self: flex-start;
+  padding: 0 16px;
+  height: 2.25rem;
+  font-size: 0.8rem;
+}
+
+.adm-empty-state {
+  color: var(--sh-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.adm-delete-modal-body { display: flex; flex-direction: column; gap: 12px; }
+.adm-delete-modal-body .input-data { margin-bottom: 0; }
+
+@media (max-width: 640px) {
+  .adm-bar-row { grid-template-columns: 70px 1fr auto; }
+}

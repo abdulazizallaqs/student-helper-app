@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-i18n-default="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+  <title>Student Helper — مساعد الطالب الذكي</title>
+  <meta name="description" content="Student Helper: منصة تساعدك ترفع ملخصاتك، تنظمها، وتحولها لاختبارات وبطاقات مراجعة بالذكاء الاصطناعي في ثوانٍ.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <script src="../js/theme.js"></script>
+  <link rel="stylesheet" href="../css/splash.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body class="splash-page">
+
+  <!-- Nav -->
+  <nav class="splash-nav" id="splashNav">
+    <a href="/" class="splash-brand">
+      <span class="splash-logo-badge"><i class="fa fa-graduation-cap"></i></span>
+      Student Helper
+    </a>
+
+    <div class="splash-nav-links">
+      <a href="#about" data-i18n="nav.about">عن التطبيق</a>
+      <a href="#features" data-i18n="nav.features">المميزات</a>
+      <a href="#how" data-i18n="nav.how">كيف يعمل</a>
+    </div>
+
+    <div class="splash-nav-actions">
+      <a href="/login" class="splash-btn splash-btn-ghost" data-i18n="nav.login">تسجيل الدخول</a>
+      <a href="/create-account" class="splash-btn splash-btn-primary">
+        <i class="fa fa-user-plus"></i>
+        <span data-i18n="nav.signup">إنشاء حساب</span>
+      </a>
+      <button class="splash-menu-toggle" id="splashMenuToggle" aria-label="القائمة">
+        <i class="fa fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div id="splashMobileMenu" style="display:none; padding:10px 24px 20px; border-bottom:1px solid var(--sh-line); background:var(--sh-surface);">
+    <a href="#about" class="splash-btn splash-btn-ghost" style="width:100%; margin-bottom:8px;" data-i18n="nav.about">عن التطبيق</a>
+    <a href="#features" class="splash-btn splash-btn-ghost" style="width:100%; margin-bottom:8px;" data-i18n="nav.features">المميزات</a>
+    <a href="#how" class="splash-btn splash-btn-ghost" style="width:100%; margin-bottom:8px;" data-i18n="nav.how">كيف يعمل</a>
+    <a href="/login" class="splash-btn splash-btn-ghost" style="width:100%; margin-bottom:8px;" data-i18n="nav.login">تسجيل الدخول</a>
+    <a href="/create-account" class="splash-btn splash-btn-primary" style="width:100%;"><i class="fa fa-user-plus"></i> <span data-i18n="nav.signup">إنشاء حساب</span></a>
+  </div>
+
+  <!-- Hero -->
+  <header class="splash-hero">
+    <div class="splash-hero-blob" aria-hidden="true"><span></span><span></span></div>
+
+    <div class="splash-hero-copy splash-reveal">
+      <span class="splash-eyebrow"><i class="fa fa-sparkles"></i> <span data-i18n="hero.eyebrow">مدعوم بالذكاء الاصطناعي</span></span>
+      <h1><span data-i18n="hero.titlePrefix">ملخصاتك تتحول لـ</span><span class="splash-accent-text splash-rotate" id="splashRotate" aria-live="polite"> اختبار</span><span data-i18n="hero.titleSuffix"> بضغطة وحدة</span></h1>
+      <p class="splash-lead" data-i18n="hero.lead">
+        ارفع ملفات مذاكرتك، نظّمها بالتصنيفات، وشاركها مع زملائك — والذكاء الاصطناعي
+        يولّد لك أسئلة اختبار وبطاقات مراجعة من نفس المحتوى، ويجاوبك على أسئلتك مباشرة
+        من داخل التطبيق.
+      </p>
+      <div class="splash-hero-actions">
+        <a href="/create-account" class="splash-btn splash-btn-primary">
+          <i class="fa fa-rocket"></i>
+          <span data-i18n="hero.cta">ابدأ مجانًا</span>
+        </a>
+        <a href="#features" class="splash-btn splash-btn-ghost">
+          <span data-i18n="hero.ctaSecondary">شوف المميزات</span>
+          <i class="fa fa-arrow-down"></i>
+        </a>
+      </div>
+      <div class="splash-hero-note">
+        <i class="fa fa-shield-halved"></i>
+        <span data-i18n="hero.note">بياناتك محفوظة عندك، ونستخدم الذكاء الاصطناعي فقط على المحتوى اللي ترفعه بنفسك.</span>
+      </div>
+    </div>
+
+    <div class="splash-demo-wrap splash-reveal">
+      <div>
+        <div class="splash-demo-card" id="splashDemoCard">
+          <div class="splash-demo-card-inner">
+            <div class="splash-demo-face">
+              <span class="splash-demo-tag" data-i18n="demo.frontTag">بطاقة مراجعة تجريبية</span>
+              <p class="splash-demo-text" id="splashDemoFront" data-i18n="demo.frontText">وش أسرع طريقة تحول بها ملخص PDF لاختبار؟</p>
+              <span class="splash-demo-hint"><i class="fa fa-hand-pointer"></i> <span data-i18n="demo.frontHint">اضغط لعرض الإجابة</span></span>
+            </div>
+            <div class="splash-demo-face is-back">
+              <span class="splash-demo-tag" data-i18n="demo.backTag">الإجابة</span>
+              <p class="splash-demo-text" id="splashDemoBack" data-i18n="demo.backText">ارفع الملف بصفحة "For Me" أو "My Files" واضغط زر "اختبار سريع" — الذكاء الاصطناعي يسوّي الباقي.</p>
+              <span class="splash-demo-hint"><i class="fa fa-rotate"></i> <span data-i18n="demo.backHint">اضغط للرجوع</span></span>
+            </div>
+          </div>
+        </div>
+        <p class="splash-demo-caption" data-i18n="demo.caption">هذا مثال توضيحي — بطاقاتك الحقيقية تُبنى من ملفاتك أنت</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- About -->
+  <section class="splash-section" id="about">
+    <div class="splash-section-head splash-reveal">
+      <h2 data-i18n="about.heading">عن Student Helper</h2>
+      <p data-i18n="about.subheading">منصة مذاكرة تعاونية للطلاب: مكان واحد ترفع فيه ملخصاتك، تلقى فيه ملفات زملائك، وتخلي الذكاء الاصطناعي يساعدك تراجع أسرع وأذكى.</p>
+    </div>
+
+    <div class="splash-about splash-reveal">
+      <p class="splash-about-copy" data-i18n="about.copy">
+        بدل ما تظل تقلّب بين ملفات متناثرة ومجموعات واتساب، Student Helper يجمع لك
+        كل مصادر المذاكرة بمكان واحد: ارفع، صنّف، وشارك مع اللي تحب. ولما تحتاج تراجع
+        بسرعة قبل اختبار، الذكاء الاصطناعي يبني لك اختبار قصير أو بطاقات مراجعة من نفس
+        الملف — بدون ما تسوي شي يدوي.
+      </p>
+
+      <div class="splash-about-stat">
+        <i class="fa fa-folder-open"></i>
+        <strong data-i18n="about.stat1Title">رفع ومشاركة</strong>
+        <span data-i18n="about.stat1Sub">ملفات PDF وصور ومستندات</span>
+      </div>
+      <div class="splash-about-stat">
+        <i class="fa fa-wand-magic-sparkles"></i>
+        <strong data-i18n="about.stat2Title">ذكاء اصطناعي مدمج</strong>
+        <span data-i18n="about.stat2Sub">اختبارات، بطاقات، وملخصات</span>
+      </div>
+      <div class="splash-about-stat">
+        <i class="fa fa-comments"></i>
+        <strong data-i18n="about.stat3Title">تفاعل بين الطلاب</strong>
+        <span data-i18n="about.stat3Sub">تعليقات ورسائل على كل ملف</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="splash-section" id="features">
+    <div class="splash-section-head splash-reveal">
+      <h2 data-i18n="features.heading">كل اللي تحتاجه عشان تذاكر بذكاء</h2>
+      <p data-i18n="features.subheading">مميزات مبنية حول رحلة الطالب الفعلية: من رفع الملف لين المراجعة النهائية قبل الاختبار.</p>
+    </div>
+
+    <div class="splash-features-grid">
+      <article class="splash-feature-card splash-reveal">
+        <div class="splash-feature-icon"><i class="fa fa-cloud-arrow-up"></i></div>
+        <h3 data-i18n="features.f1Title">رفع ملفات سريع</h3>
+        <p data-i18n="features.f1Text">ارفع ملخصاتك بصيغة PDF أو صور أو Word، وصنّفها حسب المادة عشان تلقاها بسهولة بعدين.</p>
+      </article>
+
+      <article class="splash-feature-card splash-reveal">
+        <div class="splash-feature-icon"><i class="fa fa-circle-question"></i></div>
+        <h3 data-i18n="features.f2Title">اختبار سريع بالذكاء الاصطناعي</h3>
+        <p data-i18n="features.f2Text">حوّل أي ملف PDF لاختبار اختيار من متعدد تلقائي، مبني على نفس محتوى الملف بالضبط.</p>
+      </article>
+
+      <article class="splash-feature-card splash-reveal">
+        <div class="splash-feature-icon"><i class="fa fa-clone"></i></div>
+        <h3 data-i18n="features.f3Title">بطاقات مراجعة</h3>
+        <p data-i18n="features.f3Text">ولّد بطاقات "سؤال وجواب" من ملاحظاتك، وراجعها بسرعة قبل الاختبار من أي جهاز.</p>
+      </article>
+
+      <article class="splash-feature-card splash-reveal">
+        <div class="splash-feature-icon"><i class="fa fa-robot"></i></div>
+        <h3 data-i18n="features.f4Title">مساعد الذكاء الاصطناعي</h3>
+        <p data-i18n="features.f4Text">اسأل مساعد الدراسة أي سؤال، أو خليه يلخّص لك ملف طويل بثواني.</p>
+      </article>
+
+      <article class="splash-feature-card splash-reveal">
+        <div class="splash-feature-icon"><i class="fa fa-bookmark"></i></div>
+        <h3 data-i18n="features.f5Title">المفضلة والتنظيم</h3>
+        <p data-i18n="features.f5Text">احفظ الملفات المهمة بالمفضلة، وابحث بسرعة بين كل الملفات المتاحة لك.</p>
+      </article>
+
+      <article class="splash-feature-card splash-reveal">
+        <div class="splash-feature-icon"><i class="fa fa-comment-dots"></i></div>
+        <h3 data-i18n="features.f6Title">تعليقات ورسائل</h3>
+        <p data-i18n="features.f6Text">علّق على ملفات زملائك، وأرسل رسائل مباشرة لتنسيق المذاكرة الجماعية.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="splash-section" id="how">
+    <div class="splash-section-head splash-reveal">
+      <h2 data-i18n="how.heading">يبدأ معك بثلاث خطوات بسيطة</h2>
+      <p data-i18n="how.subheading">ما يحتاج إعداد معقّد — تسجّل، ترفع، وتراجع.</p>
+    </div>
+
+    <div class="splash-steps">
+      <div class="splash-step splash-reveal">
+        <div class="splash-step-num">1</div>
+        <h3 data-i18n="how.s1Title">أنشئ حساب</h3>
+        <p data-i18n="how.s1Text">سجّل ببريدك خلال أقل من دقيقة، بدون تعقيد.</p>
+      </div>
+      <div class="splash-step splash-reveal">
+        <div class="splash-step-num">2</div>
+        <h3 data-i18n="how.s2Title">ارفع ملفاتك</h3>
+        <p data-i18n="how.s2Text">حمّل ملخصاتك وصنّفها حسب المادة عشان تنظمها من البداية.</p>
+      </div>
+      <div class="splash-step splash-reveal">
+        <div class="splash-step-num">3</div>
+        <h3 data-i18n="how.s3Title">راجع بالذكاء الاصطناعي</h3>
+        <p data-i18n="how.s3Text">ولّد اختبار أو بطاقات مراجعة، أو اسأل المساعد مباشرة.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="splash-section" id="faq">
+    <div class="splash-section-head splash-reveal">
+      <h2 data-i18n="faq.heading">أسئلة شائعة</h2>
+      <p data-i18n="faq.subheading">وش يبيلك تعرفه قبل لا تبدأ.</p>
+    </div>
+
+    <div class="splash-faq splash-reveal">
+      <div class="splash-faq-item">
+        <button class="splash-faq-question" type="button" aria-expanded="false">
+          <span data-i18n="faq.q1">هل التطبيق مجاني؟</span>
+          <i class="fa fa-chevron-down"></i>
+        </button>
+        <div class="splash-faq-answer">
+          <p data-i18n="faq.a1">إي، إنشاء الحساب ورفع الملفات واستخدام أدوات الذكاء الاصطناعي كلها متاحة بدون أي رسوم.</p>
+        </div>
+      </div>
+
+      <div class="splash-faq-item">
+        <button class="splash-faq-question" type="button" aria-expanded="false">
+          <span data-i18n="faq.q2">وش أنواع الملفات اللي أقدر أرفعها؟</span>
+          <i class="fa fa-chevron-down"></i>
+        </button>
+        <div class="splash-faq-answer">
+          <p data-i18n="faq.a2">PDF وصور ومستندات Word وملفات مضغوطة. أدوات الذكاء الاصطناعي (الاختبار والبطاقات) تدعم حاليًا ملفات PDF.</p>
+        </div>
+      </div>
+
+      <div class="splash-faq-item">
+        <button class="splash-faq-question" type="button" aria-expanded="false">
+          <span data-i18n="faq.q3">هل بياناتي وملفاتي آمنة؟</span>
+          <i class="fa fa-chevron-down"></i>
+        </button>
+        <div class="splash-faq-answer">
+          <p data-i18n="faq.a3">ملفاتك مرتبطة بحسابك فقط، والمحتوى اللي ترفعه يُستخدم مع الذكاء الاصطناعي فقط عشان يولّد لك الاختبارات والبطاقات وملخصاتك أنت - تقدر تراجع التفاصيل كاملة في سياسة الخصوصية.</p>
+        </div>
+      </div>
+
+      <div class="splash-faq-item">
+        <button class="splash-faq-question" type="button" aria-expanded="false">
+          <span data-i18n="faq.q4">وش الفرق بين "اختبار سريع" و"بطاقات المراجعة"؟</span>
+          <i class="fa fa-chevron-down"></i>
+        </button>
+        <div class="splash-faq-answer">
+          <p data-i18n="faq.a4">"اختبار سريع" يولّد أسئلة اختيار من متعدد تختبر فهمك، و"بطاقات المراجعة" تعطيك بطاقات سؤال وجواب قصيرة تراجعها بسرعة - الاثنين يُبنون من نفس محتوى ملفك.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="splash-cta splash-reveal">
+    <h2 data-i18n="cta.heading">جاهز تبدأ تذاكر بذكاء؟</h2>
+    <p data-i18n="cta.subheading">الحساب مجاني، والبداية أسرع من ما تتوقع.</p>
+    <a href="/create-account" class="splash-btn splash-btn-primary">
+      <i class="fa fa-rocket"></i>
+      <span data-i18n="cta.button">إنشاء حساب مجاني</span>
+    </a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="splash-footer">
+    <div class="splash-footer-inner">
+      <span class="splash-footer-copy">© <span id="splashYear"></span> Student Helper</span>
+      <div class="splash-footer-links">
+        <a href="/login" data-i18n="nav.login">تسجيل الدخول</a>
+        <a href="/privacy-policy" data-i18n="footer.privacy">سياسة الخصوصية</a>
+        <a href="/terms-of-service" data-i18n="footer.terms">شروط الاستخدام</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Sticky nav shadow on scroll
+    const nav = document.getElementById('splashNav');
+    const onScroll = () => {
+      if (window.scrollY > 8) nav.classList.add('is-scrolled');
+      else nav.classList.remove('is-scrolled');
+    };
+    document.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('splashMenuToggle');
+    const mobileMenu = document.getElementById('splashMobileMenu');
+    menuToggle.addEventListener('click', () => {
+      const isOpen = mobileMenu.style.display === 'block';
+      mobileMenu.style.display = isOpen ? 'none' : 'block';
+      menuToggle.innerHTML = isOpen ? '<i class="fa fa-bars"></i>' : '<i class="fa fa-xmark"></i>';
+    });
+    mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      mobileMenu.style.display = 'none';
+      menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
+    }));
+
+    // Reveal-on-scroll
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      document.querySelectorAll('.splash-reveal').forEach(el => observer.observe(el));
+    } else {
+      document.querySelectorAll('.splash-reveal').forEach(el => el.classList.add('is-visible'));
+    }
+
+    // Smooth scroll for in-page anchors
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Flashcard demo flip
+    const demoCard = document.getElementById('splashDemoCard');
+    demoCard.addEventListener('click', () => demoCard.classList.toggle('is-flipped'));
+
+    document.getElementById('splashYear').textContent = new Date().getFullYear();
+
+    // Rotating headline word - swaps between English and Arabic word lists
+    // when the language toggle changes (see js/i18n.js), and resets to the
+    // first word so it never shows a stale, wrong-language word mid-rotation.
+    const ROTATE_WORDS = {
+      ar: [' اختبار', ' بطاقات مراجعة', ' ملخص ذكي', ' إجابات فورية'],
+      en: [' a quiz', ' flashcards', ' a smart summary', ' instant answers'],
+    };
+    const rotateEl = document.getElementById('splashRotate');
+    let rotateIndex = 0;
+    if (rotateEl) {
+      const currentWords = () => ROTATE_WORDS[document.documentElement.lang === 'en' ? 'en' : 'ar'];
+      setInterval(() => {
+        const words = currentWords();
+        rotateIndex = (rotateIndex + 1) % words.length;
+        rotateEl.classList.add('is-swapping');
+        setTimeout(() => {
+          rotateEl.textContent = words[rotateIndex];
+          rotateEl.classList.remove('is-swapping');
+        }, 220);
+      }, 2600);
+      window.addEventListener('sh:langchange', () => {
+        rotateIndex = 0;
+        rotateEl.textContent = currentWords()[0];
+      });
+    }
+
+    // FAQ accordion
+    document.querySelectorAll('.splash-faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.splash-faq-item');
+        const isOpen = item.classList.contains('is-open');
+        document.querySelectorAll('.splash-faq-item.is-open').forEach(openItem => {
+          if (openItem !== item) {
+            openItem.classList.remove('is-open');
+            openItem.querySelector('.splash-faq-question').setAttribute('aria-expanded', 'false');
+          }
+        });
+        item.classList.toggle('is-open', !isOpen);
+        btn.setAttribute('aria-expanded', String(!isOpen));
+      });
+    });
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,63 @@
+<html lang="en" dir="ltr" data-i18n-default="en">
+  <head>
+    <meta charset="UTF-8">
+  <title>Create Account - Student Helper</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+	  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
+
+	  <script src="https://cdn.tailwindcss.com"></script>
+
+
+
+    <link rel="stylesheet" href="../css/design-system.css">
+    <script src="../js/theme.js"></script>
+    <script src="../js/i18n.js"></script>
+</head>
+<header class="header" style="position:relative;">
+<h1 class="texth justify-center">Student Helper</h1>
+</header>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <h1 class="login-header" data-i18n="create.header">Create Account</h1>
+      <form action="/create-account" method="POST" id="create-account">
+        <!--User Name -->
+        <input type="text" class="input-field" id="name" name="name" placeholder="Name" data-i18n-placeholder="create.name">
+
+        <input type="text" class="input-field" id="email" name="email" placeholder="Email" data-i18n-placeholder="create.email">
+
+        <input type="text" class="input-field" id="username" name="username" placeholder="Users name" data-i18n-placeholder="create.username">
+
+        <!-- Password Input -->
+        <input type="password" class="input-field" id="password" name="password" placeholder="Password" data-i18n-placeholder="create.password">
+
+        <!-- Login Button -->
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin:10px 0; color:#333;">
+          <input type="checkbox" id="terms" name="terms" required>
+          <span><span data-i18n="create.termsPrefix">أوافق على</span> <a href="/terms-of-service" target="_blank" data-i18n="footer.terms">شروط الاستخدام</a> <span data-i18n="create.termsAnd">و</span><a href="/privacy-policy" target="_blank" data-i18n="footer.privacy">سياسة الخصوصية</a></span>
+        </label>
+
+        <!-- Login Button -->
+        <button type="submit" class="btn-login" data-i18n="create.button">Create</button>
+      </form>
+
+
+    </div>
+  </div>
+
+</body>
+</html>

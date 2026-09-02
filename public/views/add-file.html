@@ -1,0 +1,198 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Upload a File - Student Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/toast.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/toast.js"></script>
+  <script src="../js/search.js"></script>
+
+  <link rel="stylesheet" href="../css/design-system.css">
+  <script src="../js/theme.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/fileCard.js"></script>
+  <script src="../js/aiSummary.js"></script>
+</head>
+
+<body>
+
+
+  <div class="flex flex-col h-screen bg-background">
+    <header class="flex flex-col items-center justify-between p-8">
+      <h1 class="texth justify-center">Student Helper</h1>
+      <div class="search-box">
+        <button class="btn-search"><i class="fa fa-search" aria-hidden="false"></i></button>
+        <input type="text" class="input-search" placeholder="Type to Search..." data-i18n-placeholder="common.searchPlaceholder">
+      </div>
+    </header>
+
+
+    <div>
+      <nav class="navbar">
+        <a href="/views/profile.html" class="navy" title="My account" data-i18n-title="nav.account" data-i18n-aria="nav.account"><i class="fa fa-user-circle" aria-hidden="false"></i></a>
+        <a href="/views/chat.html" class="navy" title="Messages" data-i18n-title="nav.messages" data-i18n-aria="nav.messages"><i class="fa-solid fa-comments"></i></a>
+        <a href="/views/ai-buddy.html" class="navy" title="AI Study Buddy" data-i18n-title="nav.aiBuddy" data-i18n-aria="nav.aiBuddy"><i class="fas fa-robot"></i></a>
+        <a href="/views/add-file.html" class="navy" title="Add a file" data-i18n-title="nav.addFile" data-i18n-aria="nav.addFile"><i class="fa fa-plus-square" aria-hidden="false"></i></a>
+        <a href="/views/File-page.html" class="navy" title="Files" data-i18n-title="nav.files" data-i18n-aria="nav.files"><i class="fa fa-file" aria-hidden="false"></i></a>
+        <a href="/views/favorite.html" class="navy" title="Favourites" data-i18n-title="nav.favorites" data-i18n-aria="nav.favorites"><i class="fa fa-bookmark" aria-hidden="false"></i></a>
+      </nav>
+    </div>
+
+    <div class="login-container">
+      <div class="login-box">
+        <h1 class="login-header" data-i18n="add.header">Add Files</h1>
+        <form action="/upload-note" method="POST" enctype="multipart/form-data" id="add-file-form">
+
+          <select name="category" class="input-field3" id="category" required>
+            <option value="" disabled selected data-i18n="add.chooseCategory">Choose a category</option>
+          </select>
+
+          <!-- Categories are no longer a fixed list. Picking "Add a new
+               category" reveals this box; the name typed here is created (or
+               matched to an existing one, case-insensitively) on the server
+               when the file is uploaded - see File.findOrCreateCategory. -->
+          <input type="text" name="newCategory" id="newCategory" class="input-field"
+                 placeholder="New category name (e.g. Organic Chemistry)" data-i18n-placeholder="add.newCategoryPlaceholder"
+                 maxlength="60" autocomplete="off" hidden>
+
+          <input type="text" name="title" class="input-field" placeholder="File name" data-i18n-placeholder="add.filename" required>
+          <textarea name="description" class="input-field2" placeholder="Describe your file..." data-i18n-placeholder="add.describe" required></textarea>
+
+          <div class="button-container">
+            <input type="file" name="file" id="file" style="display: none;" required onchange="updateFileName()">
+            <input type="text" id="file-name" class="input-field" placeholder="No file selected" data-i18n-placeholder="add.noFile" readonly>
+            <button class="btn-share"><i class="fa-solid fa-paperclip"
+                onclick="document.getElementById('file').click();"></i></button>
+            <button type="submit" class="btn-upload"><i class="fa-solid fa-upload"></i></button>
+          </div>
+
+
+        </form>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const categorySelect = document.getElementById('category'); // Reference to dropdown
+
+        // Fetch categories from backend
+        fetch('/categories')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch categories');
+            }
+            return response.json();
+          })
+          .then(data => {
+            data.forEach(category => {
+              const option = document.createElement('option');
+              option.value = category.id; // Category ID
+              option.textContent = category.name; // Category Name
+              categorySelect.appendChild(option);
+            });
+            addNewCategoryOption(categorySelect);
+          })
+          .catch(error => {
+            console.error('Error fetching categories:', error);
+            // Even if the list could not be loaded, the user can still name a
+            // category rather than being unable to upload at all.
+            addNewCategoryOption(categorySelect);
+            if (typeof showToast === 'function') {
+              showToast(t('add.categoryLoadError', 'Could not load the category list.'), 'warning');
+            }
+          });
+
+        // --- "Add a new category" ---------------------------------------
+        //
+        // The dropdown was limited to whatever rows already existed in the
+        // Categories table, so a subject nobody had uploaded for yet simply
+        // could not be chosen - notes ended up filed under a category that
+        // did not describe them.
+        const newCategoryInput = document.getElementById('newCategory');
+        const NEW_CATEGORY = '__new__';
+
+        function addNewCategoryOption(select) {
+          if (select.querySelector(`option[value="${NEW_CATEGORY}"]`)) return;
+          const option = document.createElement('option');
+          option.value = NEW_CATEGORY;
+          option.textContent = t('add.newCategory', '+ Add a new category...');
+          select.appendChild(option);
+        }
+
+        categorySelect.addEventListener('change', () => {
+          const creatingNew = categorySelect.value === NEW_CATEGORY;
+          newCategoryInput.hidden = !creatingNew;
+          newCategoryInput.required = creatingNew;
+          if (creatingNew) {
+            newCategoryInput.focus();
+          } else {
+            // Must be emptied, not just hidden: the server treats a non-empty
+            // newCategory as "create this one" and would ignore the dropdown.
+            newCategoryInput.value = '';
+          }
+        });
+      });
+
+      // Upload confirmation. fileController.uploadFile redirects back here
+      // with ?uploaded=<new file id> on success.
+      document.addEventListener('DOMContentLoaded', () => {
+        const uploadedId = new URLSearchParams(window.location.search).get('uploaded');
+        if (!uploadedId) return;
+
+        const box = document.createElement('div');
+        box.style.cssText =
+          'margin:0 0 16px; padding:12px 16px; border-radius:10px; background:#dff0d8;' +
+          'color:#2c5c33; border:1px solid #b7ddb9; font-size:0.9rem; display:flex;' +
+          'align-items:center; gap:10px; flex-wrap:wrap;';
+        box.innerHTML =
+          '<i class="fa fa-circle-check" aria-hidden="true"></i>' +
+          `<span>${t('add.uploaded', 'Your file was uploaded.')}</span>`;
+
+        const link = document.createElement('a');
+        link.href = `/views/Display.html?id=${encodeURIComponent(uploadedId)}`;
+        link.textContent = t('add.openIt', 'Open it');
+        link.style.cssText = 'font-weight:700; color:#2c5c33; text-decoration:underline;';
+        box.appendChild(link);
+
+        const header = document.querySelector('.login-header');
+        if (header) header.insertAdjacentElement('afterend', box);
+
+        // Drop the query string so a refresh does not re-announce it.
+        window.history.replaceState({}, '', window.location.pathname);
+      });
+
+      function updateFileName() {
+        const fileInput = document.getElementById('file'); // Reference to file input
+        const fileNameInput = document.getElementById('file-name'); // Reference to the text input for file name
+
+        if (fileInput.files.length > 0) {
+          // Get the selected file's name
+          const selectedFile = fileInput.files[0].name;
+          fileNameInput.value = selectedFile; // Set the file name to the input field
+        } else {
+          // Reset to "No file selected" if no file is chosen
+          fileNameInput.value = t('add.noFile', 'No file selected');
+        }
+      }
+    </script>
+
+  </div>
+</body>
+
+</html>

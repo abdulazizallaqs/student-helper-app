@@ -1,0 +1,59 @@
+{
+  "name": "student-helper-",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "seed:admin": "node scripts/seedAdmin.js",
+    "admin:password": "node scripts/setAdminPassword.js",
+    "diagnose": "node scripts/diagnose.js",
+    "migrate": "node scripts/migrate-favorites-unique.js",
+    "db:repair": "node scripts/db-repair.js",
+    "ai:check": "node scripts/ai-check.js",
+    "ai:net": "node scripts/net-check.js",
+    "search:index": "node scripts/search-index.js",
+    "google:check": "node scripts/google-check.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@google/genai": "^2.19.0",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^1.20.3",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.2.1",
+    "express-session": "^1.18.1",
+    "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
+    "markdown-it": "^14.1.0",
+    "morgan": "^1.10.1",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.5",
+    "nodemon": "^3.1.7",
+    "noty": "^3.2.0-beta-deprecated",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "pdf-parse": "^2.4.5",
+    "sweetalert2": "^11.14.5"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0",
+    "tailwindcss": "^3.4.17",
+    "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

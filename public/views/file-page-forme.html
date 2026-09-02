@@ -1,0 +1,181 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Files Shared With Me - Student Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+  <script src="../js/displayChat.js"></script>
+  <script src="../js/addMsg.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../js/toast.js"></script>
+  <script src="../js/search.js"></script>
+
+
+  </style>
+
+  <link rel="stylesheet" href="../css/design-system.css">
+  <script src="../js/theme.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/fileCard.js"></script>
+  <script src="../js/aiSummary.js"></script>
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <div class="flex flex-col h-screen bg-background">
+      <header class="flex flex-col items-center justify-between p-8">
+        <h1 class="texth justify-center">Student Helper</h1>
+        <div class="search-box">
+          <button class="btn-search"><i class="fa fa-search" aria-hidden="false"></i></button>
+          <input type="text" class="input-search" placeholder="Type to Search..." data-i18n-placeholder="common.searchPlaceholder">
+        </div>
+      </header>
+
+      <div>
+        <nav class="navbar">
+          <a href="/views/profile.html" class="navy" title="My account" data-i18n-title="nav.account" data-i18n-aria="nav.account"><i class="fa fa-user-circle" aria-hidden="false"></i></a>
+          <a href="/views/chat.html" class="navy" title="Messages" data-i18n-title="nav.messages" data-i18n-aria="nav.messages"><i class="fa-solid fa-comments"></i></a>
+          <a href="/views/ai-buddy.html" class="navy" title="AI Study Buddy" data-i18n-title="nav.aiBuddy" data-i18n-aria="nav.aiBuddy"><i class="fas fa-robot"></i></a>
+          <a href="/views/add-file.html" class="navy" title="Add a file" data-i18n-title="nav.addFile" data-i18n-aria="nav.addFile"><i class="fa fa-plus-square" aria-hidden="false"></i></a>
+          <a href="/views/File-page.html" class="navy" title="Files" data-i18n-title="nav.files" data-i18n-aria="nav.files"><i class="fa fa-file" aria-hidden="false"></i></a>
+          <a href="/views/favorite.html" class="navy" title="Favourites" data-i18n-title="nav.favorites" data-i18n-aria="nav.favorites"><i class="fa fa-bookmark" aria-hidden="false"></i></a>
+        </nav>
+      </div>
+
+      <div>
+        <nav class="navbar2">
+          <a href="../views/file-page-forme.html" class="navy2">
+            <h1 data-i18n="files.forMe">For Me</h1>
+          </a>
+          <a href="../views/file-page-myfile.html" class="navy2">
+            <h1 data-i18n="files.myFiles">My Files</h1>
+          </a>
+        </nav>
+      </div>
+
+
+      <!-- "Recommended for You" moved here from User-Dashboard.html, which has
+           been removed. This is now the page you land on after signing in, so
+           it is where the suggestions belong. Hidden until there is something
+           to put in it, so a page with no AI available looks deliberate rather
+           than broken. -->
+      <section id="recommendations" class="reco-strip" hidden>
+        <h2 class="reco-heading">
+          <span data-i18n="dashboard.recommended">Recommended for You</span>
+        </h2>
+        <div class="reco-list" id="reco-list"></div>
+      </section>
+
+      <div class="container">
+        <!-- Cards will be dynamically added here -->
+      </div>
+      <div id="file-container" class="file-container">
+        <!-- Files will be dynamically added here -->
+      </div>
+    </div>
+  </div>
+  <!-- Modal for add Message -->
+  <div class="modal" id="msg">
+    <span class="close" onclick="closeMsg()">&times;</span>
+    <h1 class="" data-i18n="msg.title">Add Message</h1>
+    <form action="/add-msg" method="POST" id="add-message">
+
+      <select name="receiver" class="input-data" id="receiver" required>
+        <option value="" disabled selected data-i18n="msg.chooseReceiver">Choose a receiver</option>
+      </select>
+
+      <textarea name="content" class="input-field2" id="content" placeholder="Content..." data-i18n-placeholder="msg.content" required></textarea>
+
+      <div class="button-container">
+
+        <button type="submit" class="btn-msg" data-i18n="msg.send">Send Message</button>
+      </div>
+
+
+    </form>
+  </div>
+  <!-- End Modal for add Message -->
+  <script>
+    // Files uploaded by everyone else. Cards come from public/js/fileCard.js -
+    // one two-sided card component shared by every list in the app.
+    document.addEventListener('DOMContentLoaded', async () => {
+      const container = document.querySelector('.container');
+      container.innerHTML = '<div class="cards-empty-state"><span>Loading files...</span></div>';
+      try {
+        const response = await fetch('/files-for-me');
+        if (!response.ok) throw new Error('Error fetching files.');
+
+        const files = await response.json();
+        renderFileCards(container, files, {
+          favorite: true,
+          summarize: true,
+          emptyIcon: 'fa fa-folder-open',
+          emptyKey: 'files.emptyForMe',
+          emptyMessage: 'No files have been shared with you yet.'
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        container.innerHTML =
+          '<div class="cards-empty-state"><i class="fa fa-triangle-exclamation"></i>' +
+          '<span>Could not load the files. Please refresh the page.</span></div>';
+      }
+    });
+
+    // summarizeFile used to be defined here, so the "Sum" button existed on
+    // this page only. It lives in public/js/aiSummary.js now and every file
+    // list gets it.
+
+    // Topic suggestions. The endpoint caches its answer for six hours, so
+    // landing here after every sign-in does not spend a request every time.
+    document.addEventListener('DOMContentLoaded', async () => {
+      const section = document.getElementById('recommendations');
+      const list = document.getElementById('reco-list');
+      if (!section || !list) return;
+
+      try {
+        const response = await fetch('/api/ai/recommend', { method: 'POST' });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!Array.isArray(data.recommendations) || data.recommendations.length === 0) return;
+
+        data.recommendations.forEach((topic) => {
+          // topic is AI-generated (derived from this user's own file titles
+          // and descriptions), so it is untrusted content: it goes in as
+          // text, and into the URL encoded.
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'reco-card';
+          button.textContent = topic;
+          button.addEventListener('click', () => {
+            window.location.href = '/views/User-Search.html?q=' + encodeURIComponent(topic);
+          });
+          list.appendChild(button);
+        });
+
+        section.hidden = false;
+      } catch (error) {
+        // A dashboard decoration must never be the reason a page looks broken.
+        console.error('Could not load recommendations:', error);
+      }
+    });
+  </script>
+
+
+</body>
+
+</html>

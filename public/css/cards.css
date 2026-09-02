@@ -1,0 +1,618 @@
+.header {
+  position: relative;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  position: fixed;
+  top: 2rem;
+  z-index: 1000;
+}
+
+
+/* html, body {
+    margin: 0;
+    height: 100%;
+    overflow-x: hidden;
+} */
+
+body {
+  background-image: url('../images/n4.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wrapper {
+  min-height: 100vh;
+  /* Ensure the wrapper takes up the full height of the viewport */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.texth {
+  font-size: xxx-large;
+  font-family: "Lucida Handwriting", cursive;
+  font-weight: bold;
+  position: relative;
+  justify-self: center;
+}
+
+.textl {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  font-size: x-large;
+  font-family: "Lucida Handwriting", cursive;
+  font-weight: bold;
+
+}
+
+.search-box {
+  margin-top: 2rem;
+  width: fit-content;
+  height: fit-content;
+  position: relative;
+  justify-self: center;
+}
+
+.input-search {
+  height: 30px;
+  width: 80%;
+  border-style: none;
+  padding: 10px;
+  font-size: 18px;
+  letter-spacing: 2px;
+  outline: none;
+  border-radius: 25px;
+  transition: all .5s ease-in-out;
+  background-color: #483C32;
+  padding-right: 40px;
+  color: #ffffff;
+  justify-self: center;
+}
+
+.input-search::placeholder {
+  color: rgba(255, 255, 255, .5);
+  font-size: 18px;
+  letter-spacing: 2px;
+  font-weight: 100;
+}
+
+.btn-search {
+  width: 50px;
+  height: 50px;
+  border-style: none;
+  font-size: 20px;
+  font-weight: bold;
+  outline: none;
+  cursor: pointer;
+  border-radius: 50%;
+  position: absolute;
+  right: 0px;
+  color: #ffffff;
+  background-color: transparent;
+  pointer-events: painted;
+}
+
+.btn-search:focus~.input-search {
+  width: 80%;
+  border-radius: 20px;
+  background-color: #483C32;
+  border-bottom: 1px solid rgba(255, 255, 255, .5);
+  transition: all 500ms cubic-bezier(0, 0.110, 0.35, 2);
+}
+
+.input-search:focus {
+  width: 80%;
+  border-radius: 500px;
+  background-color: #483C32;
+  border-bottom: 1px solid rgba(255, 255, 255, .5);
+  transition: all 500ms cubic-bezier(0, 0.110, 0.35, 2);
+}
+
+.navbar {
+  background-color: #483c3217;
+  ;
+  display: flex;
+  list-style-type: none;
+  justify-self: auto;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  padding-block: 30px;
+  gap: 4rem;
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.navy {
+  font-size: 2rem;
+  margin: 0 1.5rem;
+  color: #483C32;
+  pointer-events: visibleStroke;
+  transition: all 0.3s ease;
+}
+
+.navy:hover {
+  font-size: 2.5rem;
+  color: #483c326e;
+}
+
+.navbar2 {
+  margin-top: 30px;
+
+  display: flex;
+  list-style-type: none;
+  justify-self: center;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  padding-block: 5px 10px;
+  ;
+  gap: 1rem;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.navy2 {
+  font-family: "Lucida Handwriting", cursive;
+  font-weight: bold;
+  color: #483C32;
+  font-size: 1.2rem;
+  /* Smaller font size */
+  margin: 0 1rem;
+  /* Smaller margins between items */
+}
+
+.navy2:hover {
+  font-size: 1.5rem;
+  /* Slightly increase size on hover */
+  color: #483c326e;
+}
+
+
+/* cards styles */
+/* cards styles */
+/* cards styles */
+/* cards styles */
+/* cards styles */
+
+.container {
+  margin-top: 2rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6rem, 16rem));
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10rem;
+  background: transparent;
+}
+
+.card {
+
+  position: relative;
+  width: 275px;
+  height: 160px;
+  background: #483c326e;
+  transition: 0.5s;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.card:hover {
+  height: 300px;
+}
+
+.card .lines {
+  position: absolute;
+  inset: 5px;
+  background: #483c326e;
+  overflow: hidden;
+}
+
+.card .lines::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 120px;
+  background: linear-gradient(transparent, #483C32, #6f5d4e, #dbb698, transparent);
+  animation: animate 4s linear infinite;
+}
+
+.card .lines::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background: #483c326e;
+}
+
+@keyframes animate {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.card .content {
+
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  overflow: hidden;
+  transition: 0.5s;
+
+  padding-top: 50px;
+}
+
+
+
+.card:hover .content .details {
+  transform: translateY(0px);
+}
+
+/* Title Section */
+.card .title {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Lucida Handwriting", cursive;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+
+.card .title span {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Lucida Handwriting", cursive;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+
+.card .content .details {
+  width: 100%;
+  text-align: center;
+  transition: 0.5s;
+  transform: translateY(115px);
+}
+
+.card .content .details h2 {
+  font-family: "Lucida Handwriting", cursive;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2rem;
+}
+
+.card .content .details h2 span {
+  font-family: "Lucida Handwriting", cursive;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.card .content .details .info {
+  width: 100%;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.card .content .details .info h3 {
+  font-size: 0.8rem;
+  color: #fff;
+  line-height: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.card .content .details .actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.card .content .details .actions button {
+  min-width: 80px;
+  padding: 8px 10px;
+  border: none;
+  outline: none;
+  background: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #222;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: 0.3s;
+}
+
+.card .content .details .actions button:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.message {
+  color: red;
+  margin-bottom: 10px;
+}
+
+.editebutton {
+  margin-left: 1.5rem;
+  position: fixed;
+  /* margin-top: 1.5rem; */
+  font-size: 1.5rem;
+  left: 0;
+  top: -60%;
+}
+
+.uploadby {
+  color: rgb(216, 223, 246);
+}
+
+/* Modal Positioning and Size */
+.modal-comment {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  font-size: 16px;
+  overflow: auto;
+  background-color: rgba(72, 60, 50, 0.988);
+  padding: 1rem 1rem;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  /* text-align: center; */
+  width: 300px;
+  height: 500px;
+
+  /* display: none;
+  position: fixed;
+  z-index: 1000;
+  right: 0;
+  top: 0;
+  width: 30%;
+  height: 100%;
+  background-color: #f4f4f4;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+  overflow: auto;
+  padding: 20px; */
+
+  background-color: #f4f4f4;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal Content Styling */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+}
+
+/* Close Button */
+.close {
+  align-self: flex-end;
+  font-size: 20px;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Chat History Section */
+.chat-history {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #444;
+}
+
+.chat-item {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.chat-item:last-child {
+  border-bottom: none;
+}
+
+.chat-item strong {
+  color: #007bff;
+  /* Username color */
+}
+
+.chat-date {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Divider Line */
+hr {
+  border: 1px solid #ccc;
+}
+
+/* Chat Input Section */
+.chat-input {
+  width: 90%;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: none;
+}
+
+.chat-button {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #483C32;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.chat-button:hover {
+  background-color: #3e3229;
+}
+
+
+.modal-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border: 2px solid #282727;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1003;
+  width: 400px;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.modal-content-m h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+.modal-content-m p {
+  margin: 15px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+button {
+  margin: 10px 5px 0 0;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button#confirmDeleteBtn {
+  background-color: #f44336;
+  color: white;
+}
+
+button#cancelDeleteBtn {
+  background-color: #ddd;
+  color: black;
+}
+
+.updateModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  position: fixed;
+  z-index: 1000;
+
+  height: 70%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+
+  border: 2px solid #282727;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.modal-content-up {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 100%;
+  text-align: center;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Rating */
+.file-container {
+  margin: 20px;
+}
+
+.file {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.stars {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.stars .star {
+  font-size: 24px;
+  color: #ddd;
+  margin: 0 2px;
+  transition: color 0.3s;
+}
+
+.stars .star:hover,
+.stars .star.active {
+  color: gold;
+}
+
+.modal-msg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #483c32ca;
+  z-index: 1002;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 8px;
+  border-radius: 8px;
+  display: none;
+  color: rgb(244, 245, 244);
+  /* margin-left: 10px; */
+}

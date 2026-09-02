@@ -1,0 +1,578 @@
+body {
+  font-family: "Lucida Handwriting", cursive;
+  background-image: url('../images/n4.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+
+.texth {
+  font-size: xxx-large;
+  font-family: "Lucida Handwriting", cursive;
+  font-weight: bold;
+
+}
+
+.search-box {
+  width: fit-content;
+  height: fit-content;
+  position: relative;
+}
+
+.input-search {
+  height: 50px;
+  width: 50px;
+  border-style: none;
+  padding: 10px;
+  font-size: 18px;
+  letter-spacing: 2px;
+  outline: none;
+  border-radius: 25px;
+  transition: all .5s ease-in-out;
+  background-color: #483C32;
+  padding-right: 40px;
+  color: #ffffff;
+}
+
+.input-search::placeholder {
+  color: rgba(255, 255, 255, .5);
+  font-size: 18px;
+  letter-spacing: 2px;
+  font-weight: 100;
+}
+
+.btn-search {
+  width: 50px;
+  height: 50px;
+  border-style: none;
+  font-size: 20px;
+  font-weight: bold;
+  outline: none;
+  cursor: pointer;
+  border-radius: 50%;
+  position: absolute;
+  right: 0px;
+  color: #ffffff;
+  background-color: transparent;
+  pointer-events: painted;
+}
+
+.btn-search:focus~.input-search {
+  width: 300px;
+  border-radius: 20px;
+  background-color: #483C32;
+  border-bottom: 1px solid rgba(255, 255, 255, .5);
+  transition: all 500ms cubic-bezier(0, 0.110, 0.35, 2);
+}
+
+.input-search:focus {
+  width: 300px;
+  border-radius: 500px;
+  background-color: #483C32;
+  border-bottom: 1px solid rgba(255, 255, 255, .5);
+  transition: all 500ms cubic-bezier(0, 0.110, 0.35, 2);
+}
+
+.navbar {
+  background-color: #483c3217;
+  ;
+  display: flex;
+  list-style-type: none;
+  justify-self: auto;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  padding-block: 30px;
+  gap: 4rem;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.navy {
+  font-size: 2rem;
+  margin: 0 1.5rem;
+  color: #483C32;
+  pointer-events: visibleStroke;
+  transition: all 0.3s ease;
+}
+
+.navy:hover {
+  font-size: 2.5rem;
+  color: #483c326e;
+}
+
+
+.login-box {
+
+  background-color: rgba(72, 60, 50, 0.85);
+  padding: 6rem 6rem;
+  border-radius: 20px;
+  /* Slightly rounded corners */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  /* Enhanced shadow */
+  text-align: center;
+  width: 90%;
+  /* Make it responsive */
+  max-width: 500px;
+  /* Limit max size on larger screens */
+  margin-top: 3rem;
+}
+
+.login-header {
+  font-size: 2.5rem;
+  /* Adjusted to relative size */
+  font-weight: bold;
+  margin-bottom: 2rem;
+  /* Spaced below the header */
+}
+
+.input-field {
+  width: 100%;
+  height: 3rem;
+  /* Increased height */
+  border: none;
+  margin-bottom: 1.5rem;
+  /* Increased spacing between inputs */
+  border-radius: 10px;
+  /* Slightly rounded input fields */
+  padding: 0 1rem;
+  /* Added padding for a better feel */
+  font-size: 1.25rem;
+  /* Adjusted for consistent scaling */
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+
+}
+
+.input-field2 {
+  width: 100%;
+  height: 6rem;
+  /* Increased height */
+  border: none;
+  margin-bottom: 1.5rem;
+  /* Increased spacing between inputs */
+  border-radius: 10px;
+  /* Slightly rounded input fields */
+  padding: 0 1rem;
+  /* Added padding for a better feel */
+  font-size: 1rem;
+  /* Adjusted for consistent scaling */
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+
+.input-field:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.btn-upload {
+
+  width: 100%;
+  height: 3.5rem;
+  /* Increased height */
+  border: none;
+  border-radius: 10px;
+  /* Slightly rounded button */
+  font-size: 1.5rem;
+  /* Larger button text */
+  background-color: #483C32;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+}
+
+.btn-upload:hover {
+  background-color: rgba(72, 60, 50, 0.8);
+  transform: translateY(-2px);
+}
+
+.texth {
+  font-size: xxx-large;
+  font-family: "Lucida Handwriting", cursive;
+  font-weight: bold;
+
+}
+
+.textl {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  font-size: x-large;
+  font-family: "Lucida Handwriting", cursive;
+  font-weight: bold;
+
+}
+
+.login-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.admin-link,
+.create-account-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.admin-link:hover,
+.create-account-link:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  /* Remove extra margins */
+}
+
+select.input-field {
+  width: 100%;
+  height: 3rem;
+  /* Match height with text input */
+  border: none;
+  margin-bottom: 1.5rem;
+  border-radius: 10px;
+  padding: 0 1rem;
+  font-size: 1.25rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgb(255, 255, 255);
+  appearance: none;
+  /* Remove default browser arrow styling */
+}
+
+select.input-field:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.btn-share {
+  width: 2rem;
+  height: 2rem;
+  border-style: none;
+  font-size: 3rem;
+  font-weight: bold;
+  border-radius: 50%;
+  color: #ffffff67;
+  background-color: transparent;
+  justify-content: flex-start;
+
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  /* Position buttons on opposite sides */
+  width: 100%;
+  /* Ensure it spans the container width */
+  margin-top: 1rem;
+  /* Add spacing above the buttons */
+}
+
+.btn-share,
+.btn-upload {
+  width: 10rem;
+  /* Optional: Make both buttons similar in width */
+  height: 3.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 3rem;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-share {
+  background-color: transparent;
+  /* Different color for the Share button */
+}
+
+.btn-share:hover {
+  background-color: transparent;
+}
+
+.btn-upload {
+  background-color: transparent;
+  /* Original color for the Upload button */
+}
+
+.btn-upload:hover {
+  background-color: transparent;
+}
+
+.message {
+  color: red;
+  margin-bottom: 10px;
+}
+
+.texto {
+  color: rgba(72, 60, 50, 0.8);
+  background-color: rgba(72, 60, 50, 0.8);
+}
+
+/* Style for the select dropdown */
+.input-field3 {
+  width: 100%;
+  height: 3rem;
+  /* Increased height */
+  border: none;
+  margin-bottom: 1.5rem;
+  /* Increased spacing between inputs */
+  border-radius: 10px;
+  /* Slightly rounded input fields */
+  padding: 0 1rem;
+  /* Added padding for a better feel */
+  font-size: 1.25rem;
+  /* Adjusted for consistent scaling */
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Hover and focus states */
+.input-field3:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  /* Slightly darker gray on hover */
+  color: rgba(255, 255, 255, 0.1);
+}
+
+.input-field3:focus {
+  outline: none;
+  /* Remove default focus outline */
+  border-color: #007bff;
+  /* Highlight border color */
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+  /* Add a subtle blue shadow */
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Style the dropdown arrow */
+.input-field3::-ms-expand {
+  display: none;
+  /* Remove dropdown arrow in IE */
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.input-field3 option {
+  background-color: #f5f5f5;
+  /* Background for options */
+  color: #483C32;
+  /* Text color for options */
+  padding: 10px;
+}
+
+.input-data {
+  width: 100%;
+  border: none;
+  margin-bottom: 2rem;
+  border-radius: 10px;
+  padding: 0 1rem;
+  height: 2rem;
+  font-size: 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.label-data {
+  position: absolute;
+  left: 0;
+  /* top: 5rem; */
+  margin-top: -1.5rem;
+  /* margin-bottom: 10rem; */
+  border-radius: 10px;
+  /* height: 2rem; */
+  font-size: 16px;
+  margin-left: 20px;
+  color: #ffffff;
+}
+
+.input-data option {
+  background-color: #f5f5f5;
+  color: #483C32;
+  padding: 10px;
+}
+
+.update-button {
+  position: absolute;
+  left: 0;
+  width: 5rem;
+  height: 2rem;
+  padding: 2px;
+  font-size: 16px;
+  background-color: #e1e1e1;
+  font-family: 'Courier New', Courier, monospace;
+  color: #483C32;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  bottom: 0;
+  margin-bottom: 50px;
+  margin-left: 75px;
+}
+
+.update-delete {
+  position: absolute;
+  left: 0;
+  width: 5rem;
+  height: 2rem;
+  padding: 2px;
+  font-size: 16px;
+  background-color: #e1e1e1;
+  font-family: 'Courier New', Courier, monospace;
+  color: #483C32;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  bottom: 0;
+  margin-bottom: 50px;
+  margin-left: 170px;
+}
+
+.update-button:hover,
+.update-delete:hover {
+  background-color: #b1aca8;
+}
+
+.modal h1 {
+  color: #e1e1e1;
+  font-size: 16px;
+  margin-bottom: 70px;
+}
+
+
+.container-msg {
+  /* position: absolute; */
+  float: right;
+  right: 0;
+  width: 100%;
+  flex-wrap: wrap;
+  overflow: auto;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid rgba(9, 9, 9, 0.5);
+  padding: 5px;
+  background: #483C32;
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.container-msg2 {
+  /* position: absolute; */
+  float: right;
+  right: 0;
+  width: 100%;
+  flex-wrap: wrap;
+  overflow: auto;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid rgba(9, 9, 9, 0.5);
+  padding: 5px;
+  background: #483C32;
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.msg-item {
+
+  background: #fff;
+  padding: 15px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-show {
+  width: 45%;
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  border-radius: 15px;
+  font-size: 1.5rem;
+  background-color: #90847b;
+  color: #ffffff;
+
+  transition: all 0.3s ease;
+}
+
+.btn-show:hover {
+  background: #877463;
+}
+
+.msg-item2 {
+  height: auto;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background-color: #b8b3b3;
+  /* margin: 15% auto; */
+  padding: 20px;
+  border: 2px solid #313131;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+  border-radius: 5%;
+
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  font-size: 16px;
+  overflow: auto;
+  background-color: rgba(72, 60, 50, 0.988);
+  padding: 1rem 1rem;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  width: 300px;
+  height: 450px;
+
+}
+
+.btn-msg {
+  /* width: 5rem; */
+  height: 2rem;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #9d9b99;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 70px;
+
+}
+
+.msg-date {
+  font-family: 'Courier New', Courier, monospace;
+  color: #483C32;
+  font-size: 1rem;
+}

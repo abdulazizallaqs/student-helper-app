@@ -1,0 +1,70 @@
+# Render Blueprint - https://render.com/docs/blueprint-spec
+#
+# With this committed, Render's "New > Blueprint" reads the whole setup from
+# the repo instead of you filling in a form. The secrets are deliberately NOT
+# here (sync: false means "ask me in the dashboard"), because this file is
+# committed to a public repository.
+services:
+  - type: web
+    name: student-helper
+    runtime: node
+    plan: free
+    # Free instances spin down after 15 minutes of no traffic and take about
+    # a minute to wake. That is the trade for free; nothing in the app can
+    # change it.
+    buildCommand: npm ci
+    startCommand: npm start
+    # Answers without touching the database, so a slow query cannot convince
+    # Render the app is dead and restart it.
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+
+      # Render generates this once and keeps it. It must NOT change between
+      # deploys - a new secret invalidates every session cookie, signing
+      # everybody out.
+      - key: SESSION_SECRET
+        generateValue: true
+
+      # THE IMPORTANT ONE. Render's filesystem is wiped on every deploy and
+      # every spin-down. With "disk", uploads silently disappear.
+      - key: FILE_STORAGE
+        value: database
+
+      # A free instance has 512 MB of RAM and a free database has few
+      # connections. Ten is generous for both.
+      - key: DB_POOL_SIZE
+        value: "5"
+
+      # Every hosted MySQL requires TLS, and mysql2 does not enable it on its
+      # own - without this the connection is refused with a handshake error
+      # that says nothing about certificates.
+      - key: DB_SSL
+        value: "true"
+
+      # Filled in from your database provider (TiDB Cloud: Connect > General).
+      # TiDB listens on 4000, not 3306.
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+
+      # Optional. Without a key the AI features report themselves as switched
+      # off; without the Google pair the sign-in button hides itself.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false

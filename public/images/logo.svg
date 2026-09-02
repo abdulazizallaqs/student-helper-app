@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Student Helper">
+  <title>Student Helper</title>
+  <defs>
+    <linearGradient id="shLogoBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#128b62"/>
+      <stop offset="1" stop-color="#22c98f"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#shLogoBg)"/>
+  <!-- mortarboard -->
+  <path d="M32 13 L57 24.5 L32 36 L7 24.5 Z" fill="#ffffff"/>
+  <!-- cap body, sitting under the board -->
+  <path d="M19 29.2 L19 40.5 C19 45 24.8 48 32 48 C39.2 48 45 45 45 40.5 L45 29.2 L32 35.2 Z"
+        fill="#ffffff" opacity="0.86"/>
+  <!-- tassel -->
+  <path d="M54 26.2 L54 37.5" stroke="#f7c948" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+  <path d="M54 37.5 C57.4 37.5 57.4 47 54 47 C50.6 47 50.6 37.5 54 37.5 Z" fill="#f7c948"/>
+</svg>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+  <link rel="stylesheet" href="../css/Display.css">
+  <script src="../js/displayChat.js"></script>
+  <script src="../js/fileAiTools.js"></script>
+  <script src="../js/toast.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    .ai-result-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      padding: 24px;
+      overflow: auto;
+    }
+    .ai-result-content {
+      background: #fff;
+      max-width: 640px;
+      margin: 40px auto;
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      max-height: 85vh;
+      overflow-y: auto;
+      direction: rtl;
+      font-family: Tahoma, Arial, sans-serif;
+    }
+    .ai-result-close {
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      font-size: 22px;
+      cursor: pointer;
+      color: #333;
+    }
+    .ai-loading, .ai-error, .ai-hint { color: #555; text-align: center; padding: 10px 0; }
+    .ai-error { color: #b3402f; }
+    .ai-quiz-question { margin-bottom: 20px; }
+    .ai-quiz-question-text { font-weight: bold; margin-bottom: 10px; }
+    .ai-quiz-option {
+      display: block;
+      width: 100%;
+      text-align: right;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #f9f9f9;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .ai-quiz-option:hover { background: #f0f0f0; }
+    .ai-quiz-option.correct { background: #dff0d8; border-color: #3c763d; }
+    .ai-quiz-option.incorrect { background: #f2dede; border-color: #a94442; }
+    .ai-flashcard {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      min-height: 60px;
+    }
+    .ai-flashcard-front { font-weight: bold; }
+    .ai-flashcard-back { display: none; margin-top: 10px; color: #555; }
+    .ai-flashcard.flipped .ai-flashcard-back { display: block; }
+    .ai-flashcard.flipped .ai-flashcard-front { color: #888; }
+
+    .viewer-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 32px;
+      text-align: center;
+      background: #f7f7f5;
+      color: #444;
+      font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    }
+    .viewer-fallback[hidden] { display: none; }
+    .viewer-fallback i { font-size: 2.4rem; color: #b3402f; }
+    .viewer-fallback h3 { margin: 0; font-size: 1.1rem; }
+    .viewer-fallback p { margin: 0; max-width: 460px; line-height: 1.55; font-size: 0.92rem; }
+    .viewer-fallback-btn {
+      margin-top: 6px;
+      padding: 9px 18px;
+      border-radius: 100px;
+      background: #483C32;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+    .viewer-fallback-btn[hidden] { display: none; }
+  </style>
+
+  <title>Display File - Student Helper</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <script src="../js/theme.js"></script>
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div class="pdf-container">
+    <!--
+      The viewer used to be <embed type="application/pdf">. <embed> and
+      <object> are governed by the Content-Security-Policy `object-src`
+      directive, which app.js set to 'none' - so the browser refused to load
+      the PDF and left a blank rectangle, with no error anywhere the user
+      could see. <iframe> is governed by `frame-src` (now 'self'), and works.
+      The CSP was widened to object-src 'self' as well, so an older browser
+      falling back to <embed> is not broken either.
+    -->
+    <iframe id="pdfViewer" title="File preview" src="about:blank" width="100%" height="100%"
+            style="border:0; display:block; background:#f4f4f4;"></iframe>
+
+    <!-- Shown instead of the viewer when the file cannot be displayed, so a
+         missing upload is never silently indistinguishable from a blank page. -->
+    <div id="viewerFallback" class="viewer-fallback" hidden>
+      <i class="fa fa-file-circle-exclamation" aria-hidden="true"></i>
+      <h3 id="viewerFallbackTitle">This file cannot be displayed</h3>
+      <p id="viewerFallbackText"></p>
+      <a id="viewerFallbackLink" class="viewer-fallback-btn" href="#" target="_blank" rel="noopener" hidden>
+        <span data-i18n="display.download">Download the file</span>
+      </a>
+    </div>
+
+    <!-- TikTok-like vertical navigation -->
+    <div class="displaynavbar">
+      <!-- Inline `style="background:none;border:none"` used to sit on every
+           one of these buttons and override the stylesheet, which is why the
+           icons rendered as bare white glyphs - invisible over a white PDF
+           page. The styling lives in Display.css now (.displaynavbar button). -->
+
+      <button id="bookmark" type="button" title="Add to favourites" aria-label="Add to favourites"
+              data-i18n-title="display.favorite" data-i18n-aria="display.favorite">
+        <a><i class="fa fa-bookmark"></i></a>
+      </button>
+
+      <button id="myButton" type="button" title="Comments" aria-label="Comments"
+              data-i18n-title="display.comments" data-i18n-aria="display.comments">
+        <a><i class="fa fa-comment-dots"></i></a>
+      </button>
+
+      <button id="btnQuiz" type="button" title="AI Quiz" aria-label="AI Quiz"
+              data-i18n-title="display.quiz" data-i18n-aria="display.quiz">
+        <a><i class="fa fa-question-circle"></i></a>
+      </button>
+
+      <button id="btnFlashcards" type="button" title="AI Flashcards" aria-label="AI Flashcards"
+              data-i18n-title="display.flashcards" data-i18n-aria="display.flashcards">
+        <a><i class="fa fa-clone"></i></a>
+      </button>
+
+      <button id="btnShare" type="button" title="Copy link" aria-label="Copy link"
+              data-i18n-title="display.share" data-i18n-aria="display.share">
+        <a><i class="fa fa-share"></i></a>
+      </button>
+
+    </div>
+
+  </div>
+
+  <div> <span id="addFavorit" class="modal-msg" data-i18n="display.addedFavorite">added to favorites</span>
+    <span id="copyMessage" class="modal-msg" data-i18n="display.linkCopied">File path copied!</span>
+  </div>
+
+  <div id="chatModal" class="modal-comment">
+    <div class="modal-content">
+      <span class="close" onclick="closeChat()">&times;</span>
+      <h3 data-i18n="display.commentHistory">Comment History</h3>
+
+      <!-- Search Feature -->
+      <!-- <div class="search-box">
+        <button class="btn-search" onclick="searchChats()"><i class="fa fa-search" aria-hidden="false"></i></button>
+        <input type="text" id="searchInput" class="input-search" placeholder="Type to Search..." data-i18n-placeholder="common.searchPlaceholder">
+      </div> -->
+
+      <div id="chatHistory" class="chat-history"></div>
+      <hr />
+      <textarea id="newChatText" class="chat-input" placeholder="Type your message..." data-i18n-placeholder="display.commentPlaceholder"></textarea>
+      <button onclick="addChat()" class="chat-button" data-i18n="display.addComment">Add Comment</button>
+    </div>
+  </div>
+
+  <div id="aiResultModal" class="ai-result-modal">
+    <div class="ai-result-content">
+      <span class="ai-result-close" onclick="closeAiModal()">&times;</span>
+      <h3 id="aiResultTitle">AI</h3>
+      <div id="aiResultBody" class="ai-result-body"></div>
+    </div>
+  </div>
+
+
+  <script>
+
+    // Absolute URL of the file being viewed, used by the Share button.
+    let path = null;
+    // Which message the fallback panel is showing, stored as translation KEYS
+    // rather than as resolved text, so switching language re-renders it
+    // without reloading the page.
+    let lastFallback = null;
+
+    window.addEventListener('sh:langchange', () => {
+      if (lastFallback) showViewerFallback(...lastFallback);
+      const fileId = new URLSearchParams(window.location.search).get('id');
+      const modal = document.getElementById('chatModal');
+      if (fileId && modal && modal.style.display === 'block') openChat(fileId);
+    });
+
+    /**
+     * Show the "cannot display this" panel instead of the viewer.
+     * @param {string} titleKey - i18n key for the heading
+     * @param {string} textKey  - i18n key for the explanation
+     * @param {string} [downloadUrl] - shows a download button when given
+     * @param {string} [extra] - appended verbatim (e.g. a server message)
+     */
+    function showViewerFallback(titleKey, textKey, downloadUrl, extra) {
+      lastFallback = [titleKey, textKey, downloadUrl, extra];
+
+      const viewer = document.getElementById('pdfViewer');
+      const panel = document.getElementById('viewerFallback');
+      const link = document.getElementById('viewerFallbackLink');
+      const title = t(titleKey, titleKey);
+      const text = extra ? `${t(textKey, textKey)} ${extra}` : t(textKey, textKey);
+      if (viewer) viewer.style.display = 'none';
+      document.getElementById('viewerFallbackTitle').textContent = title;
+      document.getElementById('viewerFallbackText').textContent = text;
+      if (downloadUrl) {
+        link.href = downloadUrl;
+        link.hidden = false;
+      } else {
+        link.hidden = true;
+      }
+      panel.hidden = false;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fileId = urlParams.get('id');
+
+      if (!fileId) {
+        showViewerFallback('display.noRequest', 'display.noRequestText');
+        return;
+      }
+
+      // The bytes now come from /file-content/:id, which resolves the upload
+      // on the server by its id.
+      //
+      // The page used to build the URL itself:
+      //     /uploads/<id>-<title>.pdf
+      // guessing at the extension from the title. That guess broke whenever
+      // the title contained a space, '#', '&' or a slash; whenever the title
+      // had been edited after upload (the file on disk keeps its original
+      // name); and for anything stored under an older naming scheme. The
+      // browser then requested a path that did not exist, the <embed> showed
+      // nothing, and there was no way to tell "the upload failed" apart from
+      // "the URL is wrong" - which is exactly the confusion this page caused.
+      const contentUrl = `/file-content/${encodeURIComponent(fileId)}`;
+      path = new URL(contentUrl, window.location.origin).href;
+
+      try {
+        const response = await fetch(`/file/${encodeURIComponent(fileId)}`);
+        if (response.status === 401) {
+          showViewerFallback('display.pleaseLogin', 'display.pleaseLoginText');
+          setTimeout(() => { window.location.href = '/login'; }, 1500);
+          return;
+        }
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file details: ${response.status}`);
+        }
+        const data = await response.json();
+        document.title = `${data.title} - Student Helper`;
+
+        // Ask the server for the file before pointing the viewer at it. A
+        // failed fetch here gives a precise reason (see
+        // fileController.serveFileContent) instead of a blank frame.
+        const probe = await fetch(contentUrl, { method: 'GET', headers: { Range: 'bytes=0-0' } });
+
+        if (!probe.ok) {
+          let reason = null;
+          try { reason = await probe.json(); } catch { /* not JSON */ }
+
+          if (probe.status === 401) {
+            showViewerFallback('display.pleaseLogin', 'display.pleaseLoginText');
+            setTimeout(() => { window.location.href = '/login'; }, 1500);
+          } else if (reason && reason.error === 'missingOnDisk') {
+            showViewerFallback('display.missingTitle', 'display.missingText');
+          } else {
+            // A server-supplied reason (e.g. the database schema hint) is
+            // shown verbatim after the generic line - it is the useful part.
+            showViewerFallback(
+              'display.cannotOpen',
+              'display.loadFailedText',
+              null,
+              (reason && reason.message) || `(${probe.status})`
+            );
+          }
+          return;
+        }
+
+        const type = (probe.headers.get('content-type') || '').toLowerCase();
+        const viewable = type.startsWith('application/pdf') || type.startsWith('image/') || type.startsWith('text/');
+
+        if (!viewable) {
+          // Word documents, zips and the like cannot be shown in a frame -
+          // offer the download rather than an empty viewer.
+          showViewerFallback('display.noPreviewTitle', 'display.noPreviewText', contentUrl);
+          return;
+        }
+
+        document.getElementById('pdfViewer').src = contentUrl;
+      } catch (error) {
+        console.error('Error loading file:', error);
+        showViewerFallback('display.loadFailedTitle', 'display.loadFailedText');
+      }
+    });
+
+    document.getElementById('myButton').addEventListener('click', function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fileId = urlParams.get('id');
+
+      const modal = document.getElementById('chatModal');
+      modal.style.display = 'block';
+      openChat(fileId);
+    });
+
+    document.getElementById('bookmark').addEventListener('click', function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fileId = urlParams.get('id');
+
+      addToFavorites(fileId);
+
+    });
+    document.getElementById('btnShare').addEventListener('click', function () {
+      if (!path) return;
+      // `path` is an absolute URL now - the old value was a bare
+      // "/uploads/..." string, which is not usable once pasted anywhere else.
+      navigator.clipboard.writeText(path)
+        .then(() => {
+          // Show the confirmation message
+          const message = document.getElementById('copyMessage');
+          message.style.display = 'inline';
+
+          // Hide the message after 3 seconds
+          setTimeout(() => {
+            message.style.display = 'none';
+          }, 3000);
+        })
+    });
+
+  </script>
+</body>
+
+</html>

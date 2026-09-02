@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+    <title>AI Study Buddy - Student Helper</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/design-system.css">
+    <script src="../js/theme.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/fileCard.js"></script>
+  <script src="../js/aiSummary.js"></script>
+</head>
+
+<body>
+
+    <div class="wrapper" style="flex-direction: column;">
+        <header class="header">
+            <h1 class="texth">Student Helper</h1>
+        </header>
+
+        <div>
+            <nav class="navbar">
+                <a href="/views/profile.html" class="navy" title="My account" data-i18n-title="nav.account" data-i18n-aria="nav.account"><i class="fa fa-user-circle" aria-hidden="false"></i></a>
+                <a href="/views/chat.html" class="navy" title="Messages" data-i18n-title="nav.messages" data-i18n-aria="nav.messages"><i class="fa-solid fa-comments"></i></a>
+                <a href="/views/ai-buddy.html" class="navy" title="AI Study Buddy" style="background-color: var(--sh-accent-soft); color: var(--sh-accent-ink);"><i class="fas fa-robot"></i></a>
+                <a href="/views/add-file.html" class="navy" title="Add a file" data-i18n-title="nav.addFile" data-i18n-aria="nav.addFile"><i class="fa fa-plus-square" aria-hidden="false"></i></a>
+                <a href="/views/File-page.html" class="navy" title="Files" data-i18n-title="nav.files" data-i18n-aria="nav.files"><i class="fa fa-file" aria-hidden="false"></i></a>
+                <a href="/views/favorite.html" class="navy" title="Favourites" data-i18n-title="nav.favorites" data-i18n-aria="nav.favorites"><i class="fa fa-bookmark" aria-hidden="false"></i></a>
+            </nav>
+        </div>
+
+        <div class="card" style="max-width: 760px; width: 92%; margin: 20px auto 40px; height: 72vh; display: flex; flex-direction: column; padding: 0; overflow: hidden;">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--sh-line);">
+                <div class="msg-avatar" style="width: 42px; height: 42px; font-size: 1.15rem;"><i class="fas fa-robot"></i></div>
+                <div>
+                    <div class="texth" style="font-size: 1.05rem; margin: 0;" data-i18n="ai.title">AI Study Buddy</div>
+                    <div class="textl" style="font-size: 0.78rem; justify-content: flex-start; margin: 0;" data-i18n="ai.subtitle">Your personal learning assistant</div>
+                </div>
+            </div>
+
+            <div id="chat-messages" class="msg-thread">
+                <div class="msg-bubble-row is-received">
+                    <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="msg-bubble" data-i18n="ai.greeting">Hello! I'm here to help you study. Upload a note to summarize it, or just ask me anything!</div>
+                </div>
+            </div>
+
+            <form id="chat-form" style="display: flex; gap: 10px; align-items: center; padding: 14px 18px; border-top: 1px solid var(--sh-line);">
+                <input type="text" id="user-input" class="input-field" style="margin-bottom: 0;" placeholder="Type your question..." data-i18n-placeholder="ai.placeholder" autocomplete="off">
+                <button type="submit" class="btn-login" style="width: 48px; height: 48px; border-radius: 50%; padding: 0; flex-shrink: 0;">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+
+        let chatHistory = [];
+
+        function addMessage(text, isUser, isHtml = false) {
+            const row = document.createElement('div');
+            row.className = `msg-bubble-row ${isUser ? 'is-sent' : 'is-received'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble';
+            if (isHtml) {
+                bubble.innerHTML = text;
+            } else {
+                bubble.textContent = text;
+            }
+
+            if (!isUser) {
+                const avatar = document.createElement('div');
+                avatar.className = 'msg-avatar';
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                row.appendChild(avatar);
+            }
+            row.appendChild(bubble);
+
+            chatContainer.appendChild(row);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        /**
+         * An error bubble, with the underlying cause available underneath.
+         *
+         * The exact text Google returned is what identifies the problem, and
+         * until now it only ever appeared in the server's terminal - so
+         * anyone looking at this page saw a sentence with no way to find out
+         * more. The server sends it outside production; it is collapsed by
+         * default so it informs without shouting.
+         */
+        function addError(message, detail) {
+            const row = document.createElement('div');
+            row.className = 'msg-bubble-row is-received';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'msg-avatar';
+            avatar.innerHTML = '<i class="fas fa-triangle-exclamation"></i>';
+            row.appendChild(avatar);
+
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble msg-bubble-error';
+            bubble.textContent = message;
+
+            if (detail) {
+                const details = document.createElement('details');
+                details.className = 'msg-error-detail';
+                const summary = document.createElement('summary');
+                summary.textContent = 'Technical details';
+                const pre = document.createElement('pre');
+                pre.textContent = detail;   // never innerHTML - upstream text
+                details.appendChild(summary);
+                details.appendChild(pre);
+                bubble.appendChild(details);
+            }
+
+            row.appendChild(bubble);
+            chatContainer.appendChild(row);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            const row = document.createElement('div');
+            row.id = 'typing-indicator';
+            row.className = 'msg-bubble-row is-received';
+            row.innerHTML = '<div class="msg-avatar"><i class="fas fa-robot"></i></div>' +
+                '<div class="msg-bubble is-typing"><span class="msg-dot"></span><span class="msg-dot"></span><span class="msg-dot"></span></div>';
+            chatContainer.appendChild(row);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return row;
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            userInput.value = '';
+            chatHistory.push({ role: 'user', message: message });
+
+            const typingRow = showTyping();
+
+            // The server may legitimately take a while (a thinking model, plus
+            // automatic retries on a transient 504). Give it longer than the
+            // server's own deadline so the page reports the server's real
+            // reason rather than giving up first with a vague one - but do
+            // give up eventually, instead of spinning forever.
+            const abort = new AbortController();
+            const abortTimer = setTimeout(() => abort.abort(), 150000);
+
+            try {
+                const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    signal: abort.signal,
+                    headers: { 'Content-Type': 'application/json' },
+                    // chatHistory already has the current message pushed onto it above,
+                    // and it's also sent separately as "message" - so history must exclude
+                    // that last entry, or the model receives the same user turn twice in a
+                    // row with no reply in between, which the API rejects.
+                    body: JSON.stringify({ message, history: chatHistory.slice(0, -1) })
+                });
+
+                const data = await response.json().catch(() => ({}));
+                typingRow.remove();
+
+                if (!response.ok) {
+                    // The API says what actually went wrong now - a rejected
+                    // key, an exhausted quota, a retired model, no network.
+                    // This used to be "Sorry, I am taking a nap right now",
+                    // which is indistinguishable from the model declining.
+                    addError(data.message || 'The AI service is unavailable right now.', data.detail);
+                    return;
+                }
+
+                if (data.response) {
+                    // Rendered as plain text (isHtml=false), never as raw HTML: the
+                    // AI's reply is derived from user input and file content, so it
+                    // must be treated as untrusted - a crafted prompt could otherwise
+                    // get the model to emit a script/img tag that executes in this
+                    // page. .msg-bubble already has white-space:pre-wrap, so line
+                    // breaks still render correctly without needing innerHTML.
+                    addMessage(data.response, false, false);
+                    chatHistory.push({ role: 'model', message: data.response });
+                } else {
+                    addMessage('The model returned an empty reply. Try rephrasing your question.', false);
+                }
+            } catch (error) {
+                typingRow.remove();
+                if (error && error.name === 'AbortError') {
+                    addError('The assistant is taking unusually long. Try asking again, or a shorter question.');
+                } else {
+                    addError('Could not reach the Student Helper server.', String(error && error.message || error));
+                }
+                console.error(error);
+            } finally {
+                clearTimeout(abortTimer);
+            }
+        });
+    </script>
+</body>
+
+</html>

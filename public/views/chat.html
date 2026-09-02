@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+  <title>Messages - Student Helper</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <script src="../js/theme.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/fileCard.js"></script>
+  <script src="../js/aiSummary.js"></script>
+  <script src="../js/toast.js"></script>
+</head>
+
+<body>
+
+  <div class="wrapper" style="flex-direction: column;">
+    <header class="header">
+      <h1 class="texth">Student Helper</h1>
+    </header>
+
+    <div>
+      <nav class="navbar">
+        <a href="/views/profile.html" class="navy" title="My account" data-i18n-title="nav.account" data-i18n-aria="nav.account"><i class="fa fa-user-circle" aria-hidden="false"></i></a>
+        <a href="/views/chat.html" class="navy" title="Messages" style="background-color: var(--sh-accent-soft); color: var(--sh-accent-ink);"><i class="fa-solid fa-comments"></i></a>
+        <a href="/views/ai-buddy.html" class="navy" title="AI Study Buddy" data-i18n-title="nav.aiBuddy" data-i18n-aria="nav.aiBuddy"><i class="fas fa-robot"></i></a>
+        <a href="/views/add-file.html" class="navy" title="Add a file" data-i18n-title="nav.addFile" data-i18n-aria="nav.addFile"><i class="fa fa-plus-square" aria-hidden="false"></i></a>
+        <a href="/views/File-page.html" class="navy" title="Files" data-i18n-title="nav.files" data-i18n-aria="nav.files"><i class="fa fa-file" aria-hidden="false"></i></a>
+        <a href="/views/favorite.html" class="navy" title="Favourites" data-i18n-title="nav.favorites" data-i18n-aria="nav.favorites"><i class="fa fa-bookmark" aria-hidden="false"></i></a>
+      </nav>
+    </div>
+
+    <div class="chat-shell" id="chat-shell">
+      <aside class="chat-sidebar" id="chat-sidebar">
+        <div class="chat-sidebar-header">
+          <h2 data-i18n="chat.header">Messages</h2>
+          <input type="text" id="chat-search" class="chat-search" placeholder="Search people..." data-i18n-placeholder="chat.searchPeople" autocomplete="off">
+        </div>
+        <div class="chat-list" id="chat-list">
+          <div class="chat-list-empty">Loading...</div>
+        </div>
+      </aside>
+
+      <section class="chat-main" id="chat-main">
+        <div class="chat-main-empty" id="chat-main-empty">
+          <div>
+            <i class="fa-solid fa-comments" style="font-size: 2rem; opacity: 0.35; display: block; margin-bottom: 10px;"></i>
+            <span data-i18n="chat.pickSomeone">Pick someone from the list to start chatting.</span>
+          </div>
+        </div>
+
+        <div id="chat-main-active" style="display: none; flex-direction: column; height: 100%;">
+          <div class="chat-main-header">
+            <button type="button" class="chat-main-back" id="chat-back-btn" aria-label="Back to conversations" data-i18n-aria="chat.back"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="msg-avatar" id="chat-partner-avatar"></div>
+            <div class="chat-main-title" id="chat-partner-name"></div>
+          </div>
+
+          <div class="msg-thread" id="chat-thread"></div>
+
+          <form id="chat-send-form" class="chat-main-form">
+            <input type="text" id="chat-input" class="input-field" style="margin-bottom: 0;" placeholder="Type a message..." data-i18n-placeholder="chat.typeMessage" autocomplete="off">
+            <button type="submit" class="btn-login" style="width: 48px; height: 48px; border-radius: 50%; padding: 0; flex-shrink: 0;">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="../js/chat.js"></script>
+</body>
+
+</html>

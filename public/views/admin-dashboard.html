@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tab / window icon. Without these the browser asks for /favicon.ico,
+       finds nothing, and falls back to the grey globe. The SVG is what
+       modern browsers use (it stays sharp at any size and follows the tab
+       bar's pixel density); the PNG and .ico are there for the ones that do
+       not read SVG icons, and the apple-touch-icon is what iOS puts on the
+       home screen. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#12996b">
+  <title>Admin Dashboard - Student Helper</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <link rel="stylesheet" href="../css/admin-dashboard.css">
+  <script src="../js/theme.js"></script>
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="adm-page">
+      <div class="adm-topbar">
+        <header class="header" style="padding:0; align-items:flex-start; text-align:start;">
+          <h1 class="texth">Admin Dashboard</h1>
+          <p class="textl" style="justify-content:flex-start;">Users, files, and system activity at a glance</p>
+        </header>
+        <a href="/logout" class="adm-logout-link"><i class="fa fa-right-from-bracket"></i> Logout</a>
+      </div>
+
+      <!-- Overview: headline stat tiles ----------------------------------- -->
+      <section class="adm-section">
+        <h2 class="adm-section-title">Overview</h2>
+        <div class="adm-stats-grid" id="statsGrid">
+          <div class="adm-stat-tile">
+            <i class="fa fa-users adm-stat-icon"></i>
+            <span class="adm-stat-value is-loading" id="statUsers">Loading…</span>
+            <span class="adm-stat-label">Total Users</span>
+          </div>
+          <div class="adm-stat-tile">
+            <i class="fa fa-file-lines adm-stat-icon"></i>
+            <span class="adm-stat-value is-loading" id="statFiles">Loading…</span>
+            <span class="adm-stat-label">Total Files</span>
+          </div>
+          <div class="adm-stat-tile">
+            <i class="fa fa-bookmark adm-stat-icon"></i>
+            <span class="adm-stat-value is-loading" id="statFavorites">Loading…</span>
+            <span class="adm-stat-label">Total Favorites</span>
+          </div>
+          <div class="adm-stat-tile">
+            <i class="fa fa-comment adm-stat-icon"></i>
+            <span class="adm-stat-value is-loading" id="statComments">Loading…</span>
+            <span class="adm-stat-label">Total Comments</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts ------------------------------------------------------------ -->
+      <section class="adm-section">
+        <h2 class="adm-section-title">Activity</h2>
+        <div class="adm-charts-grid">
+          <div class="adm-chart-card">
+            <div class="adm-chart-head">
+              <h3 class="adm-chart-title">Files by Category</h3>
+              <button type="button" class="adm-chart-toggle" data-target="categoryTable">View as table</button>
+            </div>
+            <div class="adm-bars" id="categoryBars" role="img" aria-label="Number of files uploaded in each category"></div>
+            <table class="adm-chart-table" id="categoryTable" hidden>
+              <thead><tr><th>Category</th><th>Files</th></tr></thead>
+              <tbody id="categoryTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="adm-chart-card">
+            <div class="adm-chart-head">
+              <h3 class="adm-chart-title">Top Uploaders</h3>
+              <button type="button" class="adm-chart-toggle" data-target="uploaderTable">View as table</button>
+            </div>
+            <div class="adm-bars" id="uploaderBars" role="img" aria-label="Users with the most uploaded files"></div>
+            <table class="adm-chart-table" id="uploaderTable" hidden>
+              <thead><tr><th>User</th><th>Files</th></tr></thead>
+              <tbody id="uploaderTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Management: users / files list + delete ---------------------------- -->
+      <section class="adm-section">
+        <h2 class="adm-section-title">Manage</h2>
+        <div class="adm-management-actions">
+          <button class="btn-show" onclick="loadUsers()"><i class="fa fa-users"></i> View Users</button>
+          <button class="btn-show" onclick="loadFiles()"><i class="fa fa-file-lines"></i> View Files</button>
+          <button class="btn-show" onclick="deleteUserID()"><i class="fa fa-user-slash"></i> Delete User by ID</button>
+          <button class="btn-show" onclick="deleteFileID()"><i class="fa fa-file-circle-xmark"></i> Delete File by ID</button>
+        </div>
+
+        <div id="users-container" style="display: none;">
+          <h3 class="adm-section-title">Users</h3>
+          <div class="adm-card-grid" id="users-list"></div>
+        </div>
+
+        <div id="files-container" style="display: none;">
+          <h3 class="adm-section-title">Files</h3>
+          <div class="adm-card-grid" id="files-list"></div>
+        </div>
+      </section>
+
+      <!-- Delete-by-ID modals -->
+      <div id="users-delete" class="modal">
+        <div class="modal-content-m">
+          <h2>Delete User by ID</h2>
+          <form id="del-user" class="adm-delete-modal-body">
+            <div>
+              <label class="label-data" for="userId">User ID</label>
+              <input class="input-data" type="text" id="userId" name="userId" required>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button type="submit" class="btn-del">Delete User</button>
+              <button type="button" class="btn-show" style="background:var(--sh-surface-2); color:var(--sh-ink);" onclick="closeAdminModal('users-delete')">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id="files-delete" class="modal">
+        <div class="modal-content-m">
+          <h2>Delete File by ID</h2>
+          <form id="del-file" class="adm-delete-modal-body">
+            <div>
+              <label class="label-data" for="fileId">File ID</label>
+              <input class="input-data" type="text" id="fileId" name="fileId" required>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button type="submit" class="btn-del">Delete File</button>
+              <button type="button" class="btn-show" style="background:var(--sh-surface-2); color:var(--sh-ink);" onclick="closeAdminModal('files-delete')">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Generic confirm modal (used by admin.js) -->
+      <div id="deleteConfirmationModal" class="modal-message" style="display: none;">
+        <div class="modal-content-m">
+          <h2 id="modalTitle"></h2>
+          <p id="modalMessage"></p>
+          <div>
+            <button id="confirmDeleteBtn">Confirm</button>
+            <button id="cancelDeleteBtn">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/toast.js"></script>
+  <script src="../js/admin.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,185 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f4f4f4;
+}
+
+.pdf-container {
+  width: 98%;
+  height: 100%;
+  border: 2px solid #333;
+  position: relative;
+}
+
+/* Floating toolbar over the file preview.
+   -------------------------------------------------------------------------
+   The icons used to be plain white glyphs with no background (`color: #fff`,
+   `background: none`). Over a dark PDF that was fine; over an ordinary white
+   page - which is what almost every PDF actually looks like - they were white
+   on white and effectively invisible, so the bookmark / comment / quiz /
+   flashcard / share controls could not be found at all.
+
+   Each control is now a solid dark pill with a light glyph and a shadow, so
+   it reads against any page colour, plus a hover state and a real focus ring
+   for keyboard users. */
+
+.displaynavbar {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 1.75rem;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.55rem;
+  border-radius: 100px;
+  /* A translucent rail behind the buttons: keeps them grouped and readable
+     even where the page underneath is busy. */
+  background: rgba(28, 36, 32, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  z-index: 20;
+}
+
+.displaynavbar button {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  background: #1c2420;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* A pale ring around a dark pill. The dark fill carries it over a white
+     page (the case that was broken); the ring carries it over a dark page or
+     a photo, so the toolbar cannot disappear into whatever the document
+     happens to look like. */
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 4px 12px rgba(0, 0, 0, 0.45);
+  transition: background-color 0.18s ease, transform 0.18s ease, color 0.18s ease;
+}
+
+.displaynavbar button:hover {
+  background: #0e7a56;
+  transform: scale(1.08);
+}
+
+.displaynavbar button:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.displaynavbar button.is-active {
+  background: #0e7a56;
+}
+
+.displaynavbar a {
+  color: inherit;
+  text-align: center;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  pointer-events: none; /* the <button> around it is the control */
+}
+
+@media (max-width: 640px) {
+  .displaynavbar {
+    inset-inline-end: 50%;
+    top: auto;
+    bottom: 1rem;
+    transform: translateX(50%);
+    flex-direction: row;
+  }
+}
+
+.message {
+  color: red;
+  margin-bottom: 10px;
+}
+
+/* Modal Positioning and Size */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  right: 0;
+  top: 0;
+  width: 30%;
+  height: 100%;
+  background-color: #f4f4f4;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+  overflow: auto;
+  padding: 20px;
+}
+
+/* Modal Content Styling */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Close Button */
+.close {
+  align-self: flex-end;
+  font-size: 20px;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Chat History Section */
+.chat-history {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #444;
+}
+
+.chat-item {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.chat-item:last-child {
+  border-bottom: none;
+}
+
+.chat-item strong {
+  color: #007bff;
+  /* Username color */
+}
+
+.chat-date {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Divider Line */
+hr {
+  border: 1px solid #ccc;
+}
+
+/* Chat Input Section */
+.chat-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: none;
+}
