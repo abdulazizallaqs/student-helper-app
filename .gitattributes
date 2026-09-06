@@ -33,3 +33,16 @@ Dockerfile text eol=lf
 *.pdf  binary
 *.ico  binary
 *.zip  binary
+
+# Fonts shipped with the vendored pdf.js (public/js/vendor/pdfjs/standard_fonts).
+# `* text=auto` guesses, and a guess is not good enough here: a .pfb that git
+# decides is text gets its CRLF/LF normalised on checkout, every glyph offset
+# in the file shifts, and pdf.js renders documents that use a non-embedded
+# base-14 font as blank pages. This project has already lost one binary
+# fixture to exactly that (tests/fixtures/sample.pdf, 623 bytes instead of
+# 592, 31 CRLF pairs inserted).
+*.ttf  binary
+*.pfb  binary
+*.otf  binary
+*.woff binary
+*.woff2 binary

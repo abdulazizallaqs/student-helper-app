@@ -113,6 +113,43 @@
       font-weight: 600;
     }
     .viewer-fallback-btn[hidden] { display: none; }
+
+    /* The PDF surface. Scrolls on its own rather than growing the page, so
+       the floating toolbar stays put while the reader moves through a long
+       document. */
+    .pdf-pages {
+      position: absolute;
+      inset: 0;
+      overflow: auto;
+      background: #52565b;
+      padding: 12px 0 24px;
+      /* Momentum scrolling on iOS - without it a long PDF feels stuck. */
+      -webkit-overflow-scrolling: touch;
+    }
+    .pdf-pages[hidden] { display: none; }
+
+    .pdf-pages canvas {
+      display: block;
+      margin: 0 auto 12px;
+      max-width: calc(100% - 16px);
+      height: auto;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    .viewer-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #f4f4f4;
+      color: #444;
+      font-size: 0.95rem;
+      z-index: 2;
+    }
+    .viewer-loading[hidden] { display: none; }
   </style>
 
   <title>Display File - Student Helper</title>
@@ -124,16 +161,37 @@
 <body>
   <div class="pdf-container">
     <!--
-      The viewer used to be <embed type="application/pdf">. <embed> and
-      <object> are governed by the Content-Security-Policy `object-src`
-      directive, which app.js set to 'none' - so the browser refused to load
-      the PDF and left a blank rectangle, with no error anywhere the user
-      could see. <iframe> is governed by `frame-src` (now 'self'), and works.
-      The CSP was widened to object-src 'self' as well, so an older browser
-      falling back to <embed> is not broken either.
+      TWO viewers, because no single element displays every file type on every
+      device.
+
+      PDFs go to #pdfPages, drawn page by page onto <canvas> by the copy of
+      pdf.js in public/js/vendor/pdfjs. They used to go into the <iframe>
+      below, and that is a desktop-only trick: Chrome on Android and Safari on
+      iOS have no inline PDF plugin, so the frame was refused and the student
+      was shown Chrome's own wording -
+
+          "This content is blocked. Contact the site owner to fix the issue."
+
+      - which reads like the site is broken rather than like a browser
+      limitation. Canvas rendering has no such gap: it is the same drawing
+      primitive everywhere.
+
+      Everything else the browser CAN display inline - images, plain text -
+      still goes to the <iframe>, which handles those correctly on phones too.
+      Anything neither can show falls through to the panel below.
     -->
+    <div id="pdfPages" class="pdf-pages" hidden aria-label="File preview"></div>
+
     <iframe id="pdfViewer" title="File preview" src="about:blank" width="100%" height="100%"
-            style="border:0; display:block; background:#f4f4f4;"></iframe>
+            style="border:0; display:block; background:#f4f4f4;" hidden></iframe>
+
+    <!-- Shown while pdf.js parses and paints the first page. A large scan can
+         take a second or two, and an empty grey rectangle in the meantime is
+         indistinguishable from a failure. -->
+    <div id="viewerLoading" class="viewer-loading" hidden>
+      <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+      <span data-i18n="display.loadingFile">Loading the file...</span>
+    </div>
 
     <!-- Shown instead of the viewer when the file cannot be displayed, so a
          missing upload is never silently indistinguishable from a blank page. -->
@@ -171,6 +229,17 @@
       <button id="btnFlashcards" type="button" title="AI Flashcards" aria-label="AI Flashcards"
               data-i18n-title="display.flashcards" data-i18n-aria="display.flashcards">
         <a><i class="fa fa-clone"></i></a>
+      </button>
+
+      <!-- Same shape as its neighbours - a <button> wrapping an <a> - so it
+           picks up .displaynavbar button styling and hit-testing rather than
+           needing rules of its own. The inner <a> is a real link, so
+           middle-click and "open in new tab" work and the browser starts the
+           download itself rather than through script. The href is filled in
+           once the file id is known. -->
+      <button id="btnDownload" type="button" title="Download the file" aria-label="Download the file"
+              data-i18n-title="display.download" data-i18n-aria="display.download" hidden>
+        <a id="btnDownloadLink" href="#"><i class="fa fa-download"></i></a>
       </button>
 
       <button id="btnShare" type="button" title="Copy link" aria-label="Copy link"
@@ -229,6 +298,128 @@
       if (fileId && modal && modal.style.display === 'block') openChat(fileId);
     });
 
+    // ---- The PDF surface ---------------------------------------------------
+    //
+    // pdf.js is loaded on demand, only when the file actually is a PDF, so
+    // opening a JPEG does not pull 1.8 MB of parser across a phone
+    // connection.
+
+    /** The open PDFDocumentProxy, kept so a resize can redraw at the new width. */
+    let pdfDoc = null;
+    /** Guards against two renders racing after a fast rotate-rotate-back. */
+    let renderToken = 0;
+
+    /** Put the viewer back to a known state before showing one of its faces. */
+    function hideAllViewers() {
+      const frame = document.getElementById('pdfViewer');
+      const pages = document.getElementById('pdfPages');
+      const spinner = document.getElementById('viewerLoading');
+      if (frame) frame.hidden = true;
+      if (pages) pages.hidden = true;
+      if (spinner) spinner.hidden = true;
+    }
+
+    /**
+     * Draw every page of the open document at the container's current width.
+     *
+     * Canvas pixels are laid out at devicePixelRatio so text is sharp on a
+     * phone screen, but capped at 2: a 3x device rendering an A4 page at full
+     * ratio allocates roughly 24 megapixels per page, which is enough to have
+     * the tab killed on a mid-range Android.
+     */
+    async function paintPages() {
+      const container = document.getElementById('pdfPages');
+      if (!pdfDoc || !container) return;
+
+      const token = ++renderToken;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      // Reveal the surface BEFORE measuring it. A hidden element reports
+      // clientWidth 0, so measuring first pinned every page to the 240px
+      // floor below - a phone-sized column of text in the middle of a 1440px
+      // desktop window, identical on every device. The spinner sits on top
+      // (z-index 2, opaque) until page one is painted, so nothing flashes.
+      container.hidden = false;
+      const measured = container.clientWidth
+        || container.parentElement?.clientWidth
+        || window.innerWidth;
+      const available = Math.max(240, measured - 16);
+      const fragment = document.createDocumentFragment();
+
+      for (let pageNo = 1; pageNo <= pdfDoc.numPages; pageNo += 1) {
+        const page = await pdfDoc.getPage(pageNo);
+        if (token !== renderToken) return;      // a newer render superseded us
+
+        const unscaled = page.getViewport({ scale: 1 });
+        const viewport = page.getViewport({ scale: available / unscaled.width });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.floor(viewport.width * dpr);
+        canvas.height = Math.floor(viewport.height * dpr);
+        canvas.style.width = `${Math.floor(viewport.width)}px`;
+        canvas.setAttribute('role', 'img');
+        canvas.setAttribute('aria-label', `Page ${pageNo} of ${pdfDoc.numPages}`);
+
+        await page.render({
+          canvasContext: canvas.getContext('2d', { alpha: false }),
+          viewport,
+          transform: dpr === 1 ? null : [dpr, 0, 0, dpr, 0, 0]
+        }).promise;
+        if (token !== renderToken) return;
+
+        fragment.appendChild(canvas);
+
+        // Show the first page as soon as it exists instead of making the
+        // reader wait for page 40 of a scanned textbook.
+        if (pageNo === 1) {
+          container.replaceChildren(fragment.cloneNode(true));
+          document.getElementById('viewerLoading').hidden = true;
+        }
+      }
+
+      if (token === renderToken) container.replaceChildren(fragment);
+    }
+
+    /**
+     * Load a PDF and paint it. Throws so the caller can fall back to the
+     * download panel - a viewer that fails silently is the bug this whole
+     * change exists to remove.
+     */
+    async function renderPdf(url) {
+      const base = '/js/vendor/pdfjs/';
+      const pdfjs = await import(`${base}pdf.min.mjs`);
+
+      // Same-origin, and matching the CSP's worker-src. pdf.js refuses to
+      // start if this points at a build with a different version number.
+      pdfjs.GlobalWorkerOptions.workerSrc = `${base}pdf.worker.min.mjs`;
+
+      pdfDoc = await pdfjs.getDocument({
+        url,
+        // Substitutes for Helvetica/Times/Courier when a PDF does not embed
+        // them. Without these such documents render as blank pages.
+        standardFontDataUrl: `${base}standard_fonts/`,
+        // /file-content answers a Range request with the whole file and a
+        // plain 200. That is fine for a browser, but pdf.js would treat the
+        // response as a partial fetch and mis-slice the document, so ask it
+        // for the file in one piece.
+        disableRange: true,
+        disableStream: true,
+        // A student's own upload, from our own origin.
+        isEvalSupported: false
+      }).promise;
+
+      await paintPages();
+    }
+
+    // Rotating a phone changes the available width; without this the pages
+    // stay at the old size and either overflow or leave half the screen grey.
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      if (!pdfDoc) return;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { paintPages().catch(() => {}); }, 250);
+    });
+
     /**
      * Show the "cannot display this" panel instead of the viewer.
      * @param {string} titleKey - i18n key for the heading
@@ -239,12 +430,14 @@
     function showViewerFallback(titleKey, textKey, downloadUrl, extra) {
       lastFallback = [titleKey, textKey, downloadUrl, extra];
 
-      const viewer = document.getElementById('pdfViewer');
       const panel = document.getElementById('viewerFallback');
       const link = document.getElementById('viewerFallbackLink');
       const title = t(titleKey, titleKey);
       const text = extra ? `${t(textKey, textKey)} ${extra}` : t(textKey, textKey);
-      if (viewer) viewer.style.display = 'none';
+      // Hide every other viewer state. The fallback used to hide only the
+      // iframe, so once the PDF surface existed a failure could leave both
+      // the error panel and a half-drawn document on screen at once.
+      hideAllViewers();
       document.getElementById('viewerFallbackTitle').textContent = title;
       document.getElementById('viewerFallbackText').textContent = text;
       if (downloadUrl) {
@@ -279,6 +472,22 @@
       // "the URL is wrong" - which is exactly the confusion this page caused.
       const contentUrl = `/file-content/${encodeURIComponent(fileId)}`;
       path = new URL(contentUrl, window.location.origin).href;
+
+      // The download button works for every file type, including the ones the
+      // viewer can display - a student reading lecture notes on the bus
+      // usually wants a copy on the phone as well.
+      const downloadBtn = document.getElementById('btnDownload');
+      const downloadLink = document.getElementById('btnDownloadLink');
+      if (downloadBtn && downloadLink) {
+        downloadLink.href = `${contentUrl}?download=1`;
+        downloadBtn.hidden = false;
+        // The <a> fills the button, but a tap can still land on the 1px of
+        // padding around it. Forward that to the link rather than letting it
+        // do nothing.
+        downloadBtn.addEventListener('click', (event) => {
+          if (event.target !== downloadLink && !downloadLink.contains(event.target)) downloadLink.click();
+        });
+      }
 
       try {
         const response = await fetch(`/file/${encodeURIComponent(fileId)}`);
@@ -321,16 +530,33 @@
         }
 
         const type = (probe.headers.get('content-type') || '').toLowerCase();
-        const viewable = type.startsWith('application/pdf') || type.startsWith('image/') || type.startsWith('text/');
 
-        if (!viewable) {
-          // Word documents, zips and the like cannot be shown in a frame -
-          // offer the download rather than an empty viewer.
-          showViewerFallback('display.noPreviewTitle', 'display.noPreviewText', contentUrl);
+        if (type.startsWith('application/pdf')) {
+          hideAllViewers();
+          document.getElementById('viewerLoading').hidden = false;
+          try {
+            await renderPdf(contentUrl);
+          } catch (pdfError) {
+            // A corrupt or password-protected file, or a browser too old for
+            // module workers. Either way the reader gets the document rather
+            // than a dead end: the panel below carries a download button.
+            console.error('PDF render failed:', pdfError);
+            showViewerFallback('display.noPreviewTitle', 'display.noPreviewText', `${contentUrl}?download=1`);
+          }
           return;
         }
 
-        document.getElementById('pdfViewer').src = contentUrl;
+        if (type.startsWith('image/') || type.startsWith('text/')) {
+          hideAllViewers();
+          const frame = document.getElementById('pdfViewer');
+          frame.hidden = false;
+          frame.src = contentUrl;
+          return;
+        }
+
+        // Word documents, zips and the like cannot be shown inline at all -
+        // offer the download rather than an empty viewer.
+        showViewerFallback('display.noPreviewTitle', 'display.noPreviewText', `${contentUrl}?download=1`);
       } catch (error) {
         console.error('Error loading file:', error);
         showViewerFallback('display.loadFailedTitle', 'display.loadFailedText');

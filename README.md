@@ -7,6 +7,9 @@ about it.
 
 Bilingual (English / العربية) with full right-to-left support, and a dark theme.
 
+**Live:** <https://studenthelper.abdulazizallaqs.com> — running on Northflank
+with a TiDB Cloud database, uploads stored in the database, TLS everywhere.
+
 ## Features
 
 **Files**
@@ -39,13 +42,15 @@ Bilingual (English / العربية) with full right-to-left support, and a dark
 
 ## Screenshots
 
-| Add a file | Files shared with me |
+| Files shared with me | Add a file |
 |---|---|
-| ![Add File](photos/addfile.png) | ![For Me](photos/forme.png) |
+| ![For Me](photos/forme.png) | ![Add File](photos/addfile.png) |
 
-| AI Study Buddy | Admin dashboard |
+| AI Study Buddy | Favourites |
 |---|---|
-| ![AI Study Buddy](photos/AI.png) | ![Admin Dashboard](photos/admin.png) |
+| ![AI Study Buddy](photos/AI.png) | ![Favourites](photos/favorite.png) |
+
+![Admin Dashboard](photos/admin.png)
 
 ## Tech stack
 
@@ -57,7 +62,7 @@ Bilingual (English / العربية) with full right-to-left support, and a dark
 | Front end | Vanilla JavaScript, Tailwind (CDN), a hand-written design system in `public/css/design-system.css` |
 | Auth | `express-session` with a database-backed store, bcrypt, Passport for Google OAuth |
 | AI | Google Gemini via `@google/genai` — chat, summaries, quizzes, and embeddings for search |
-| Tests | Vitest + supertest — 292 tests across 26 files |
+| Tests | Vitest + supertest — 300 tests across 26 files |
 
 ## Quick start
 
@@ -99,12 +104,17 @@ Everything else has a working default. `.env.example` explains each setting.
 **3. Create an admin account**
 
 ```bash
-npm run seed:admin                                # creates admin / admin
-node scripts/setAdminPassword.js "a strong one"   # then change it
+node scripts/setAdminPassword.js "a strong password"
 ```
 
-The server refuses to start in production while the admin password is still
-`admin`.
+This creates the account if it does not exist yet and stores a bcrypt hash, so
+it is the only step you need — locally and in production alike. It refuses
+anything under 12 characters or without an uppercase letter, a lowercase letter
+and a digit; run it with no argument to have a strong one generated for you.
+
+`npm run seed:admin` also exists and creates `admin` / `admin`. That is fine on
+your own machine and nowhere else — the server refuses to start in production
+while the password is still `admin`.
 
 **4. Run it**
 
@@ -133,6 +143,7 @@ ones that matter most:
 | `SESSION_STORE` | database | Sessions survive a restart. Set to `memory` to fall back |
 | `GEMINI_API_KEY` | — | Optional. Without it the AI features report themselves as switched off |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | — | Optional. Without them the Google button hides itself |
+| `GOOGLE_CALLBACK_URL` | `http://localhost:<PORT>/auth/google/callback` | **Required in production.** Must match a redirect URI registered in Google Cloud character for character, or every sign-in fails with `redirect_uri_mismatch` |
 | `SEARCH_EMBEDDINGS` | auto | Set to `off` to use keyword search only |
 
 ## Commands
@@ -158,7 +169,7 @@ ones that matter most:
 npm test
 ```
 
-292 tests across 26 files. The integration tests run against a real database —
+300 tests across 26 files. The integration tests run against a real database —
 they create an isolated `<your db>_test` schema, so your development data is
 never touched.
 
@@ -172,12 +183,39 @@ deployment configuration itself.
 **[DEPLOYMENT.md](DEPLOYMENT.md)** has the full walkthrough, including a
 free-tier option that costs nothing and a hardening checklist.
 
-The short version: set `FILE_STORAGE=database`, `DB_SSL=true` and a real
-`SESSION_SECRET`, point the health check at `/healthz`, and set the admin
-password before the first production boot.
-
 A `Dockerfile` and a `render.yaml` are in the repo, so most platforms can build
 this without any configuration from you.
+
+### What the live instance runs on
+
+| Piece | Service | Why |
+|---|---|---|
+| App | Northflank (Sandbox plan) | Builds the `Dockerfile`, stays awake, no card required |
+| Database | TiDB Cloud Starter | MySQL-compatible, 5 GiB free, **port 4000**, TLS required |
+| Uploads | The database itself | Every free tier wipes the filesystem between deploys |
+| Domain | Hostinger DNS → a `CNAME` at Northflank | TLS is issued automatically by Let's Encrypt |
+
+### The five settings that decide whether it works
+
+```
+NODE_ENV=production
+DB_PORT=4000            # TiDB is not on 3306
+DB_SSL=true             # TiDB refuses an unencrypted connection
+FILE_STORAGE=database   # or every upload disappears on the next restart
+SESSION_SECRET=<48 random bytes>
+```
+
+Point the platform's health check at **`/healthz`** — it answers without
+touching the database or the session store, so a slow query cannot make the
+platform decide the app never came up.
+
+### One thing that catches everyone
+
+`.dockerignore` excludes `tests/`, so **`tests/setup/schema.sql` is not inside
+the built image**. Import the nine core tables from outside the container — your
+own machine, or the provider's SQL console — before the first sign-in. The other
+four tables (`FileBlobs`, `FileBlobChunks`, `FileEmbeddings`, `Sessions`) create
+themselves at runtime.
 
 ## Project structure
 

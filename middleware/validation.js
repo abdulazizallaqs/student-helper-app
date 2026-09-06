@@ -79,8 +79,14 @@ export const validateRegistration = [
         .trim()
         .isLength({ min: 2, max: 100 })
         .withMessage('Name must be between 2 and 100 characters')
-        .matches(/^[a-zA-Z\s]+$/)
-        .withMessage('Name can only contain letters and spaces'),
+        // \p{L} is "any letter in any alphabet" and \p{M} the combining marks
+        // that Arabic diacritics and accented Latin letters are built from, so
+        // this accepts "عبدالعزيز", "José" and "O'Brien" alike. The old
+        // /^[a-zA-Z\s]+$/ rejected every Arabic name - in an app whose whole
+        // interface is Arabic, which meant a student typing their real name
+        // was told it was invalid and had no way to guess why.
+        .matches(/^[\p{L}\p{M}\s'.-]+$/u)
+        .withMessage('Name can only contain letters, spaces, apostrophes, dots and hyphens'),
 
     body('username')
         .trim()

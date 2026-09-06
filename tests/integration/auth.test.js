@@ -30,6 +30,40 @@ describe('registration', () => {
     expect(res.headers.location).toContain('error');
   });
 
+  // The interface of this app is Arabic. The name field used to be validated
+  // with /^[a-zA-Z\s]+$/, so a student typing their own name in Arabic was
+  // bounced with "Name can only contain letters and spaces" - a message that
+  // is not just unhelpful but wrong, because what they typed WAS letters.
+  it.each([
+    ['Arabic', 'عبدالعزيز اللاقص'],
+    ['Arabic with three words', 'نورة العتيبي محمد'],
+    ['accented Latin', 'José Álvarez'],
+    ['apostrophe and hyphen', "Ali O'Brien-Smith"],
+    ['a trailing initial', 'Ahmed K.'],
+  ])('accepts a name in %s', async (_label, name) => {
+    const res = await request(app)
+      .post('/create-account')
+      .type('form')
+      .send(uniqueUser({ name }));
+    expect(res.status).toBe(200);
+    expect(res.text).toMatch(/created successfully/i);
+  });
+
+  // Widening the alphabet must not widen it to everything: the field still
+  // has to reject the payload shapes that make a name dangerous or nonsense.
+  it.each([
+    ['markup', '<script>alert(1)</script>'],
+    ['digits', 'Ahmed123'],
+    ['symbols', 'Bad$Name'],
+  ])('still rejects a name containing %s', async (_label, name) => {
+    const res = await request(app)
+      .post('/create-account')
+      .type('form')
+      .send(uniqueUser({ name }));
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain('error');
+  });
+
   it('rejects a duplicate username with a friendly message (not a 500)', async () => {
     const user = uniqueUser();
     const first = await request(app).post('/create-account').type('form').send(user);

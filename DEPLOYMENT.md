@@ -87,8 +87,20 @@ instances. MySQL-compatible, and foreign keys with `ON DELETE CASCADE` — which
 this schema relies on — are GA since TiDB v8.5.
 
 Create a **Starter** cluster, then Connect → General, and copy the host, port
-(**4000**, not 3306), user, password and database name. The app creates its own
-tables on first boot.
+(**4000**, not 3306), user, password and database name.
+
+**Then import the schema — this step is not optional.** Only four tables create
+themselves at runtime (`FileBlobs`, `FileBlobChunks`, `FileEmbeddings`,
+`Sessions`). The other nine — `Users`, `Files`, `Categories`, `chats`,
+`messages`, `messages_chat`, `Favorit`, `Admin`, `Comments` — do not. Skip this
+and the app boots, serves the login page, and fails on every single action.
+
+Paste `tests/setup/schema.sql` into TiDB Cloud's **SQL Editor**, or from your
+machine:
+
+```bash
+mysql -h <host> -P 4000 -u <user> -p --ssl-mode=REQUIRED <dbname> < tests/setup/schema.sql
+```
 
 Files count against the 5 GiB, so at the 10 MB per-file cap that is roughly 500
 uploads. `npm run diagnose` reports how much is used.
@@ -151,14 +163,27 @@ from the environment, which is what every one of these platforms sets.
 
 ### After the first deploy
 
+Run these **from your own machine, with the environment variables pointed at
+the production database** — not from the platform's shell. A platform shell
+attaches to a running container, so it is unavailable exactly when you need it
+most: when the app is failing to start. Your machine can always reach the
+database.
+
 ```bash
-node scripts/setAdminPassword.js "a strong password"   # the server REFUSES to
-                                                        # start in production
-                                                        # while it is "admin"
+node scripts/setAdminPassword.js "a strong password"
 npm run diagnose        # database, schema, and stored files
 npm run search:index    # builds the semantic search index
 npm run google:check    # only if enabling Google sign-in
 ```
+
+`setAdminPassword` creates the admin row if it is missing and updates it if it
+exists, storing a bcrypt hash either way — so production never passes through
+an `admin/admin` state at all.
+
+**Do not run `npm run seed:admin` against production.** It exists to give you a
+way into a fresh local install and it creates the password `admin`; on a
+production database it creates precisely the weak account the server then
+refuses to start with.
 
 ### Your own domain
 

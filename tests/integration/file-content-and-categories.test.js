@@ -116,6 +116,88 @@ describe('GET /file-content/:id', () => {
     expect(res.status).toBe(404);
     expect(res.body.error).toBe('notFound');
   });
+
+  // ---- ?download=1 -------------------------------------------------------
+  //
+  // The viewer renders the file in the page; these cover the button that
+  // saves a copy instead. The distinction is one header, and getting it wrong
+  // is silent in both directions: an `attachment` on the viewer path would
+  // make every file download instead of opening, and an `inline` on the
+  // button would make the button appear to do nothing on a phone.
+
+  it('sends the file as an attachment when ?download=1 is asked for', async () => {
+    const categoryId = await seedCategory();
+    const { agent } = await registerAndLogin(app);
+    const id = await upload(agent, {
+      title: 'Vectors Notes',
+      description: 'chapter 2',
+      category: categoryId,
+    });
+
+    const res = await agent.get(`/file-content/${id}?download=1`);
+    expect(res.status).toBe(200);
+    expect(res.headers['content-disposition']).toMatch(/^attachment/);
+    expect(res.headers['content-type']).toContain('application/pdf');
+    expect(res.body.length).toBeGreaterThan(0);
+  });
+
+  it('keeps an Arabic title readable in the download header', async () => {
+    const categoryId = await seedCategory();
+    const { agent } = await registerAndLogin(app);
+    const id = await upload(agent, {
+      title: 'ملخص التفاضل',
+      description: 'ملخص الفصل الثالث',
+      category: categoryId,
+    });
+
+    const res = await agent.get(`/file-content/${id}?download=1`);
+    expect(res.status).toBe(200);
+
+    // RFC 6266: the quoted `filename` is the ASCII-only fallback, and
+    // `filename*` carries the real name. Without the second one the browser
+    // saves the file with no name and no extension.
+    const disposition = res.headers['content-disposition'];
+    expect(disposition).toMatch(/^attachment/);
+    expect(disposition).toContain("filename*=UTF-8''");
+    const encoded = disposition.split("filename*=UTF-8''")[1];
+    expect(decodeURIComponent(encoded)).toContain('ملخص التفاضل');
+    expect(decodeURIComponent(encoded)).toMatch(/\.pdf$/);
+  });
+
+  it('still renders inline when download is absent or not a yes', async () => {
+    const categoryId = await seedCategory();
+    const { agent } = await registerAndLogin(app);
+    const id = await upload(agent, {
+      title: 'Vectors Notes',
+      description: 'chapter 2',
+      category: categoryId,
+    });
+
+    for (const query of ['', '?download=0', '?download=false', '?download=']) {
+      const res = await agent.get(`/file-content/${id}${query}`);
+      expect(res.status).toBe(200);
+      expect(res.headers['content-disposition']).toMatch(/^inline/);
+    }
+  });
+
+  it('does not let a crafted title break out of the Content-Disposition header', async () => {
+    const categoryId = await seedCategory();
+    const { agent } = await registerAndLogin(app);
+    const id = await upload(agent, {
+      title: 'evil" ; attachment; x="',
+      description: 'header injection attempt',
+      category: categoryId,
+    });
+
+    const res = await agent.get(`/file-content/${id}`);
+    expect(res.status).toBe(200);
+    const disposition = res.headers['content-disposition'];
+    expect(disposition).toMatch(/^inline/);
+    // One filename, one value: the stray quote must not have opened a second
+    // parameter that a browser would read as its own directive.
+    expect(disposition.match(/filename=/g)).toHaveLength(1);
+    expect(disposition).not.toMatch(/;\s*attachment/);
+  });
 });
 
 describe('POST /categories', () => {

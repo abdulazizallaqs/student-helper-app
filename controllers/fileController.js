@@ -214,13 +214,48 @@ const fileController = {
             // from anything the uploader sent - an HTML file served as
             // text/html from this origin would run as a page on it.
             res.type(stored.mimeType);
-            // `inline` so PDFs and images render in the viewer instead of
-            // downloading. The filename is quoted and stripped of quotes so a
-            // title cannot break out of the header.
-            res.setHeader(
-                'Content-Disposition',
-                `inline; filename="${stored.filename.replace(/"/g, '')}"`
-            );
+
+            // ?download=1 asks for a save, anything else renders in the viewer.
+            //
+            // The download button could have been a plain <a download> in the
+            // page, but that attribute is advisory: iOS Safari has ignored it
+            // for years and opens the file in place instead, which on a phone
+            // is indistinguishable from the button doing nothing. A real
+            // `attachment` header is obeyed by every browser there is.
+            const asAttachment = /^(1|true|yes)$/i.test(String(req.query.download || ''));
+
+            if (asAttachment) {
+                // Express builds the RFC 6266 header itself, and getting that
+                // right by hand is harder than it looks: the first attempt
+                // here emitted what reads as a perfectly valid
+                // `filename*=UTF-8''...` and Chrome still saved every
+                // Arabic-titled file as "download" - no name, no extension,
+                // and nothing in the response to explain it. ASCII titles
+                // worked throughout, so the bug was invisible until it was
+                // tested in Arabic, which is most of this app's content.
+                res.attachment(stored.filename);
+                // res.attachment also sets Content-Type from the extension.
+                // Reassert ours: it comes from the allowlist in fileStorage,
+                // never from a filename the uploader chose.
+                res.type(stored.mimeType);
+            } else {
+                // Inline has no express helper, so the fallback name is built
+                // by hand - and it is built defensively. A title is whatever
+                // the uploader typed, and a quote, backslash, semicolon or
+                // comma in it is how you talk a lenient header parser into
+                // reading a second directive: a file called
+                //     evil" ; attachment; x="
+                // must not be able to turn this response into a download, or
+                // worse. Those four characters become underscores, everything
+                // outside printable ASCII becomes an underscore too, and
+                // filename* below carries the real name for the browsers that
+                // read it (all of them, for over a decade).
+                const safeAscii = stored.filename.replace(/[^\x20-\x7E]|["\\;,]/g, '_');
+                res.setHeader(
+                    'Content-Disposition',
+                    `inline; filename="${safeAscii}"; filename*=UTF-8''${encodeURIComponent(stored.filename)}`
+                );
+            }
             res.setHeader('Content-Length', stored.byteSize);
             return res.send(stored.buffer);
         } catch (error) {

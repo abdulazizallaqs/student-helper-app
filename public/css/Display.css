@@ -183,3 +183,39 @@ hr {
   border-radius: 4px;
   resize: none;
 }
+
+/* Keeping the theme toggle clear of the file toolbar.
+   --------------------------------------------------------------------------
+   theme.js pins the toggle to the bottom corner at z-index 999 on every page.
+   This page also puts a toolbar there, and 999 beats the toolbar's 20 - so
+   whichever control the toggle happens to sit on top of stops responding,
+   with nothing to see: the tap lands on an invisible 46px circle.
+
+   It already had "Copy link" on a tall phone, and adding Download made the
+   rail longer, so on a desktop window it reached "Copy link" too. Both
+   layouts are handled here, and only on this page - theme.js is shared with
+   every other view.
+
+     desktop  the toolbar is a vertical rail up the right edge, so the toggle
+              moves to the left corner, out of that column entirely.
+     <=640px  the toolbar becomes a horizontal row along the bottom, spanning
+              the full width - there is no free corner, so the toggle lifts
+              above the row instead.
+   -------------------------------------------------------------------------- */
+/* !important is load-bearing here, not laziness: theme.js positions the
+   button with an inline `style` attribute, and an inline declaration beats
+   any stylesheet rule that is not marked important. Without it the override
+   is simply ignored and the collision stays. */
+#shThemeToggle {
+  inset-inline-end: auto !important;
+  inset-inline-start: 20px !important;
+}
+
+@media (max-width: 640px) {
+  #shThemeToggle {
+    /* 1rem toolbar offset + 46px button + 12px of air. */
+    bottom: calc(1rem + 46px + 12px) !important;
+    inset-inline-start: auto !important;
+    inset-inline-end: 20px !important;
+  }
+}

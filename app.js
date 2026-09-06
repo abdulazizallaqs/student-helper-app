@@ -96,6 +96,14 @@ app.use(helmet({
       // an injected <object> pointing at another site.
       objectSrc: ["'self'"],
       frameSrc: ["'self'", "blob:"],
+      // The PDF viewer (public/js/vendor/pdfjs) parses documents in a Web
+      // Worker so a 40-page file does not freeze the page. Without this
+      // directive `worker-src` falls back to `default-src`, and while 'self'
+      // happens to cover our own worker file, pdf.js also falls back to
+      // wrapping it in a blob: URL on browsers that reject module workers -
+      // and a blocked worker fails with nothing but a console line, leaving
+      // the reader looking at a blank page.
+      workerSrc: ["'self'", "blob:"],
       frameAncestors: ["'self'"],
       baseUri: ["'self'"],
       formAction: ["'self'"],
