@@ -87,7 +87,7 @@ const SH_TRANSLATIONS = {
     'faq.q1': 'Is the app free?',
     'faq.a1': 'Yes — creating an account, uploading files, and using the AI tools are all available at no cost.',
     'faq.q2': 'What file types can I upload?',
-    'faq.a2': 'PDF, images, Word documents and compressed files. The AI tools (quiz and flashcards) currently support PDF files.',
+    'faq.a2': 'PDF files, up to 10 MB. Only PDFs are accepted, so that every file works everywhere in the app - it opens in the reader, it can be searched by its contents, and the AI tools can summarise it or turn it into a quiz.',
     'faq.q3': 'Are my data and files safe?',
     'faq.a3': 'Your files are tied to your account only, and any content you upload is used with AI solely to generate your own quizzes, flashcards and summaries — you can review the full details in the Privacy Policy.',
     'faq.q4': 'What’s the difference between "Quick Quiz" and "Flashcards"?',
@@ -354,7 +354,7 @@ const SH_TRANSLATIONS = {
     'faq.q1': 'هل التطبيق مجاني؟',
     'faq.a1': 'إي، إنشاء الحساب ورفع الملفات واستخدام أدوات الذكاء الاصطناعي كلها متاحة بدون أي رسوم.',
     'faq.q2': 'وش أنواع الملفات اللي أقدر أرفعها؟',
-    'faq.a2': 'PDF وصور ومستندات Word وملفات مضغوطة. أدوات الذكاء الاصطناعي (الاختبار والبطاقات) تدعم حاليًا ملفات PDF.',
+    'faq.a2': 'ملفات PDF فقط، بحد أقصى ١٠ ميجابايت. اقتصرنا عليها عشان كل ملف يشتغل في كل مكان بالمنصة — يُفتح داخل الصفحة، ويُبحث في محتواه، وأدوات الذكاء الاصطناعي تقدر تلخّصه وتحوّله لاختبار.',
     'faq.q3': 'هل بياناتي وملفاتي آمنة؟',
     'faq.a3': 'ملفاتك مرتبطة بحسابك فقط، والمحتوى اللي ترفعه يُستخدم مع الذكاء الاصطناعي فقط عشان يولّد لك الاختبارات والبطاقات وملخصاتك أنت - تقدر تراجع التفاصيل كاملة في سياسة الخصوصية.',
     'faq.q4': 'وش الفرق بين "اختبار سريع" و"بطاقات المراجعة"؟',
@@ -411,7 +411,10 @@ const SH_TRANSLATIONS = {
     'common.sessionExpired': 'انتهت الجلسة. سجّل الدخول مرة ثانية.',
 
     // --- قوائم الملفات ----------------------------------------------------
-    'files.forMe': 'ملفات لي',
+    // "لي" rather than a literal "ملفات لي": the tab sits beside "ملفاتي",
+    // so the word "ملفات" on both reads as noise - the contrast that matters
+    // is mine / for me. The English side keeps "For Me" / "My Files".
+    'files.forMe': 'لي',
     'files.myFiles': 'ملفاتي',
     'files.summarize': 'تلخيص',
     'files.aiSummary': 'ملخص الذكاء الاصطناعي',
