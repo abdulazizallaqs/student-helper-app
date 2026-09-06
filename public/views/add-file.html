@@ -77,21 +77,37 @@
 
           <p class="upload-hint" data-i18n="add.pdfOnly">PDF files only - up to 10 MB.</p>
 
-          <div class="button-container">
-            <!-- accept= is a filter on the picker, not a rule: it hides other
-                 files by default but the student can still switch the dialog
-                 to "All files", and it does nothing at all against a request
-                 that never opened a dialog. The real checks are on the server
-                 (routes/fileRoutes.js): declared type, extension, and the
-                 first five bytes. This is here so the common case never gets
-                 as far as an error. -->
-            <input type="file" name="file" id="file" accept="application/pdf,.pdf"
-                   style="display: none;" required onchange="updateFileName()">
-            <input type="text" id="file-name" class="input-field" placeholder="No file selected" data-i18n-placeholder="add.noFile" readonly>
-            <button class="btn-share"><i class="fa-solid fa-paperclip"
-                onclick="document.getElementById('file').click();"></i></button>
-            <button type="submit" class="btn-upload"><i class="fa-solid fa-upload"></i></button>
+          <!-- One control, one job.
+               ------------------------------------------------------------
+               This row used to be three things: a read-only text box that
+               only ever echoed the filename back, a paperclip that opened
+               the picker, and the upload button. The text box looked like a
+               field you could type in and was not one, and the paperclip
+               carried its onclick on the <i> INSIDE a <button> with no type -
+               so a button that defaults to type="submit" sent the form
+               whenever the click landed a pixel off the icon.
+
+               Now: a labelled button that opens the picker, and the chosen
+               name as plain text underneath, where nothing pretends to be an
+               input. accept= filters the dialog; the real checks (declared
+               type, extension, and the first five bytes) are on the server in
+               routes/fileRoutes.js, because everything a browser reports
+               about a file is something the client chose to say. -->
+          <input type="file" name="file" id="file" accept="application/pdf,.pdf"
+                 hidden required onchange="updateFileName()">
+
+          <div class="file-picker">
+            <button type="button" class="btn-pick" id="pickFile">
+              <i class="fa-solid fa-paperclip" aria-hidden="true"></i>
+              <span data-i18n="add.choosePdf">Choose a PDF file</span>
+            </button>
+            <p id="file-name" class="chosen-file is-empty" data-i18n="add.noFile" aria-live="polite">No file selected</p>
           </div>
+
+          <button type="submit" class="btn-upload">
+            <i class="fa-solid fa-upload" aria-hidden="true"></i>
+            <span data-i18n="add.upload">Upload</span>
+          </button>
 
 
         </form>
@@ -187,9 +203,17 @@
         window.history.replaceState({}, '', window.location.pathname);
       });
 
+      // The picker button. A listener, not an inline onclick on the icon -
+      // which is where it used to live, so clicking the button itself did
+      // nothing but submit the half-filled form.
+      document.addEventListener('DOMContentLoaded', () => {
+        const pick = document.getElementById('pickFile');
+        if (pick) pick.addEventListener('click', () => document.getElementById('file').click());
+      });
+
       function updateFileName() {
-        const fileInput = document.getElementById('file'); // Reference to file input
-        const fileNameInput = document.getElementById('file-name'); // Reference to the text input for file name
+        const fileInput = document.getElementById('file');
+        const fileNameInput = document.getElementById('file-name'); // now a <p>, not a fake input
 
         if (fileInput.files.length > 0) {
           const chosen = fileInput.files[0];
@@ -200,7 +224,8 @@
           // and a page change to be told "not a PDF" is a poor way to say it.
           if (!/\.pdf$/i.test(chosen.name)) {
             fileInput.value = '';
-            fileNameInput.value = t('add.noFile', 'No file selected');
+            fileNameInput.textContent = t('add.noFile', 'No file selected');
+            fileNameInput.classList.add('is-empty');
             if (typeof showToast === 'function') {
               showToast(t('add.pdfOnlyError', 'Only PDF files can be uploaded.'), 'error');
             } else {
@@ -209,10 +234,11 @@
             return;
           }
 
-          fileNameInput.value = chosen.name;
+          fileNameInput.textContent = chosen.name;
+          fileNameInput.classList.remove('is-empty');
         } else {
-          // Reset to "No file selected" if no file is chosen
-          fileNameInput.value = t('add.noFile', 'No file selected');
+          fileNameInput.textContent = t('add.noFile', 'No file selected');
+          fileNameInput.classList.add('is-empty');
         }
       }
     </script>

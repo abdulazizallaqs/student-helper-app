@@ -663,3 +663,111 @@ describe('quota is per MODEL, so one exhausted model is not "the AI is out of qu
     vi.useRealTimers();
   });
 });
+
+describe('detectLanguage', () => {
+  // The quiz and flashcard prompts used to say "in ARABIC", flatly. An English
+  // thermodynamics PDF came back as Arabic questions about English notes -
+  // terminology a student cannot match to their own material or their exam.
+  //
+  // "Reply in the same language as the notes" was not enough on its own: given
+  // a short or mostly-numeric extract the model drifts to whatever language
+  // the surrounding prompt is in, and does it silently. So the language is
+  // decided here, deterministically, and named in the prompt.
+
+  it('reads English notes as English', async () => {
+    vi.stubEnv('GEMINI_API_KEY', 'x');
+    const { detectLanguage } = await import('../../services/aiService.js');
+    expect(detectLanguage('Thermodynamics: the first law states dU = Q - W.')).toBe('English');
+  });
+
+  it('reads Arabic notes as Arabic', async () => {
+    vi.stubEnv('GEMINI_API_KEY', 'x');
+    const { detectLanguage } = await import('../../services/aiService.js');
+    expect(detectLanguage('ملخص التفاضل والتكامل: المشتقة هي معدل التغير.')).toBe('Arabic');
+  });
+
+  it('goes by which script dominates, not by whether one appears at all', async () => {
+    // Technical writing mixes scripts constantly: Arabic notes quote English
+    // terms, and English notes quote Arabic ones. A single word must not
+    // decide the whole document.
+    vi.stubEnv('GEMINI_API_KEY', 'x');
+    const { detectLanguage } = await import('../../services/aiService.js');
+
+    expect(detectLanguage('الانتروبيا في النظام المغلق تزداد دائما مع الزمن entropy')).toBe('Arabic');
+    expect(detectLanguage('Entropy in a closed system always increases الانتروبيا')).toBe('English');
+  });
+
+  it('answers English for text with no letters, and for nothing at all', async () => {
+    // A page of equations should not swing the answer, and it must never
+    // return undefined - that would reach the prompt as the literal word.
+    vi.stubEnv('GEMINI_API_KEY', 'x');
+    const { detectLanguage } = await import('../../services/aiService.js');
+
+    expect(detectLanguage('1 + 1 = 2   3.14159   42%')).toBe('English');
+    expect(detectLanguage('')).toBe('English');
+    expect(detectLanguage(null)).toBe('English');
+    expect(detectLanguage(undefined)).toBe('English');
+  });
+});
+
+describe('the AI tools write in the language of the notes', () => {
+  /** Capture the prompt that would have been sent to Google. */
+  function capturingSdk() {
+    const seen = [];
+    const generateContent = vi.fn(async (request) => {
+      seen.push(String(request.contents));
+      return { text: '[]' };
+    });
+    mockSdk(generateContent);
+    return seen;
+  }
+
+  const ENGLISH = 'Thermodynamics lecture 3. The first law states dU = Q - W for a closed system.';
+  const ARABIC = 'محاضرة الديناميكا الحرارية الثالثة. القانون الأول ينص على أن التغير في الطاقة الداخلية يساوي الحرارة ناقص الشغل.';
+
+  it('asks for an English quiz from English notes', async () => {
+    vi.stubEnv('GEMINI_API_KEY', 'x');
+    const seen = capturingSdk();
+    const { default: aiService } = await import('../../services/aiService.js');
+
+    await aiService.generateQuiz(ENGLISH, 3).catch(() => {});
+    expect(seen[0]).toContain('in English');
+    expect(seen[0]).not.toContain('in Arabic');
+    // and never again the flat instruction that caused this
+    expect(seen[0]).not.toContain('in ARABIC');
+  });
+
+  it('asks for an Arabic quiz from Arabic notes', async () => {
+    vi.stubEnv('GEMINI_API_KEY', 'x');
+    const seen = capturingSdk();
+    const { default: aiService } = await import('../../services/aiService.js');
+
+    await aiService.generateQuiz(ARABIC, 3).catch(() => {});
+    expect(seen[0]).toContain('in Arabic');
+    expect(seen[0]).not.toContain('in English');
+  });
+
+  it('does the same for flashcards', async () => {
+    vi.stubEnv('GEMINI_API_KEY', 'x');
+    const seen = capturingSdk();
+    const { default: aiService } = await import('../../services/aiService.js');
+
+    await aiService.generateFlashcards(ENGLISH, 5).catch(() => {});
+    expect(seen[0]).toContain('in English');
+
+    await aiService.generateFlashcards(ARABIC, 5).catch(() => {});
+    expect(seen[1]).toContain('in Arabic');
+  });
+
+  it('and for the summary, which named no language at all before', async () => {
+    vi.stubEnv('GEMINI_API_KEY', 'x');
+    const seen = capturingSdk();
+    const { default: aiService } = await import('../../services/aiService.js');
+
+    await aiService.summarizeText(ENGLISH).catch(() => {});
+    expect(seen[0]).toContain('in English');
+
+    await aiService.summarizeText(ARABIC).catch(() => {});
+    expect(seen[1]).toContain('in Arabic');
+  });
+});

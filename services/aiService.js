@@ -256,6 +256,43 @@ function isQuotaBlocked(model) {
 }
 
 /** Models currently set aside for quota (for diagnostics). */
+/**
+ * Which language is this study material written in?
+ *
+ * WHY THIS EXISTS: the quiz and flashcard prompts said "in ARABIC", flatly,
+ * with no reference to the source. So an English thermodynamics PDF came back
+ * as Arabic questions about English text - answers a student could not match
+ * to anything in their own notes, and terminology translated into words their
+ * exam does not use.
+ *
+ * "Reply in the same language as the notes" alone is not enough. A model given
+ * a short or mostly-numeric extract drifts to whatever language the rest of
+ * the prompt is in, and the drift is silent. Deciding here and naming the
+ * language in the prompt makes it deterministic - and testable without a
+ * network call.
+ *
+ * Script counting, not word lists: Arabic and Latin occupy separate Unicode
+ * blocks, so this needs no dictionary and is not fooled by a technical term
+ * that exists in both languages. Digits, punctuation and whitespace are
+ * ignored - a page of equations should not swing the answer.
+ *
+ * @param {string} text
+ * @returns {'Arabic'|'English'} the language to write the output in
+ */
+export function detectLanguage(text) {
+    const sample = String(text || '').slice(0, 4000);
+
+    // ؀-ۿ Arabic, ݐ-ݿ Arabic Supplement,
+    // ﭐ-﷿ and ﹰ-﻿ the presentation forms some PDFs emit.
+    const arabic = (sample.match(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/g) || []).length;
+    const latin = (sample.match(/[A-Za-z]/g) || []).length;
+
+    // English is the default for a tie or for text with no letters at all
+    // (a table of numbers, say): it is the safer wrong answer, because the
+    // technical vocabulary in these files is usually English either way.
+    return arabic > latin ? 'Arabic' : 'English';
+}
+
 export function quotaBlockedModels() {
     return [...quotaBlocks.keys()].filter(isQuotaBlocked);
 }
@@ -754,9 +791,13 @@ const aiService = {
      * @returns {Promise<string>}
      */
     summarizeText: async (text) => {
+        // Naming the language beats "the same language as the notes": on a
+        // short or mostly-numeric extract the model drifts to whatever
+        // language the rest of the prompt is written in, and does it quietly.
+        const language = detectLanguage(text);
         const prompt =
             'Summarize the following study notes concisely and helpfully. ' +
-            'Reply in the same language the notes are written in. ' +
+            `Write the summary in ${language} - the language the notes themselves use. ` +
             'Use plain text with short paragraphs - no markdown, no asterisks, no headings.\n\n' +
             text.substring(0, 30000);
         return generate(prompt);
@@ -839,7 +880,10 @@ const aiService = {
      * @returns {Promise<Array<{question:string, options:string[], correctIndex:number}>>}
      */
     generateQuiz: async (text, count = 5) => {
-        const prompt = `You are creating a study quiz from the notes below. Generate exactly ${count} multiple-choice questions in ARABIC, each with 4 options and exactly one correct answer. Base every question strictly on the provided text - do not invent facts that aren't in it.
+        const language = detectLanguage(text);
+        const prompt = `You are creating a study quiz from the notes below. Generate exactly ${count} multiple-choice questions, each with 4 options and exactly one correct answer. Base every question strictly on the provided text - do not invent facts that aren't in it.
+
+Write the questions and every option in ${language}. These notes are written in ${language}, and a student revising from them needs the quiz in the same words and the same terminology - not a translation of their own material.
 
 Return ONLY valid JSON, no markdown fences, no extra text, in this exact shape:
 [{"question": "...", "options": ["...", "...", "...", "..."], "correctIndex": 0}]
@@ -861,7 +905,10 @@ ${text.substring(0, 25000)}`;
      * @returns {Promise<Array<{front:string, back:string}>>}
      */
     generateFlashcards: async (text, count = 10) => {
-        const prompt = `You are creating study flashcards from the notes below. Generate exactly ${count} flashcards in ARABIC covering the most important concepts. Each flashcard has a short "front" (a term or question) and a concise "back" (the answer or definition), based strictly on the provided text.
+        const language = detectLanguage(text);
+        const prompt = `You are creating study flashcards from the notes below. Generate exactly ${count} flashcards covering the most important concepts. Each flashcard has a short "front" (a term or question) and a concise "back" (the answer or definition), based strictly on the provided text.
+
+Write both sides of every card in ${language}, the language these notes are written in.
 
 Return ONLY valid JSON, no markdown fences, no extra text, in this exact shape:
 [{"front": "...", "back": "..."}]

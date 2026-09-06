@@ -358,6 +358,84 @@ select.input-field, .input-field3 { appearance: auto; cursor: pointer; }
 
 .btn-login a { color: inherit; text-decoration: none; }
 
+/* The upload form's file picker.
+   --------------------------------------------------------------------------
+   These live here, not in public/css/add.css: that file is not linked by any
+   page in the app. It is left over from before this design system existed,
+   and rules added to it have no effect at all - which is exactly what
+   happened the first time these were written.
+
+   The row this replaces held three controls: a read-only text box that only
+   echoed the filename back, a paperclip whose onclick sat on the <i> inside a
+   <button> with no type (so the button defaulted to submit and sent the
+   half-filled form whenever a click missed the icon), and the upload button.
+   Now: one labelled button that opens the picker, and the chosen name as
+   plain text below it. */
+.file-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.btn-pick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  height: 3rem;
+  border: 1px dashed var(--sh-line);
+  border-radius: var(--sh-radius-sm);
+  background: transparent;
+  color: var(--sh-ink);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-pick:hover,
+.btn-pick:focus-visible {
+  border-style: solid;
+  border-color: var(--sh-accent);
+  background: var(--sh-accent-soft);
+}
+
+/* The chosen filename. Plain text deliberately - styled like a field, people
+   try to type in it, which is the mistake the old markup made. */
+.chosen-file {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--sh-ink);
+  word-break: break-word;
+}
+
+.chosen-file.is-empty {
+  color: var(--sh-muted);
+  font-style: italic;
+}
+
+/* Says the rule before the student hits it. */
+.upload-hint {
+  margin: 0 0 2px;
+  font-size: 0.82rem;
+  color: var(--sh-muted);
+  text-align: center;
+}
+
+/* The upload button carried no word, only an arrow. */
+.btn-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
 .btn-del, .update-delete {
   width: 100%;
   height: 2.75rem;

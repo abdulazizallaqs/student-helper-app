@@ -23,6 +23,19 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
   <style>
+    /* The AI result panel (summary, quiz, flashcards).
+       ---------------------------------------------------------------------
+       Every colour here used to be a literal: `background: #fff` on the
+       panel, and no text colour at all, so the body inherited whatever the
+       page set. In the dark theme that inherited colour is near-white - white
+       text on a white card. The panel was there, the answers were in it, and
+       nothing could be read. Tokens instead, so both themes are handled by
+       the one rule.
+
+       `direction` is set from the CONTENT, not fixed to rtl: the quiz for an
+       English PDF was laid out right-to-left with its options right-aligned,
+       which is the wrong shape for the language it is written in. See
+       applyContentDirection() in public/js/fileAiTools.js. */
     .ai-result-modal {
       display: none;
       position: fixed;
@@ -33,7 +46,8 @@
       overflow: auto;
     }
     .ai-result-content {
-      background: #fff;
+      background: var(--sh-surface, #fff);
+      color: var(--sh-ink, #1c2420);
       max-width: 640px;
       margin: 40px auto;
       border-radius: 12px;
@@ -41,48 +55,87 @@
       position: relative;
       max-height: 85vh;
       overflow-y: auto;
-      direction: rtl;
-      font-family: Tahoma, Arial, sans-serif;
+      border: 1px solid var(--sh-line, #e0e4dc);
+      box-shadow: var(--sh-shadow-lg, 0 16px 40px rgba(0, 0, 0, 0.3));
+      font-family: var(--sh-font, Tahoma, Arial, sans-serif);
+      line-height: 1.7;
+    }
+    .ai-result-content h3 {
+      color: var(--sh-ink, #1c2420);
+      margin: 0 0 14px;
+      padding-inline-end: 28px;   /* clear of the close button */
     }
     .ai-result-close {
       position: absolute;
       top: 14px;
-      left: 18px;
+      inset-inline-start: 18px;
       font-size: 22px;
+      line-height: 1;
       cursor: pointer;
-      color: #333;
+      color: var(--sh-muted, #5c6660);
     }
-    .ai-loading, .ai-error, .ai-hint { color: #555; text-align: center; padding: 10px 0; }
-    .ai-error { color: #b3402f; }
+    .ai-result-close:hover { color: var(--sh-ink, #1c2420); }
+
+    .ai-loading, .ai-hint { color: var(--sh-muted, #5c6660); text-align: center; padding: 10px 0; }
+    .ai-error { color: var(--sh-danger, #b3402f); text-align: center; padding: 10px 0; }
+
     .ai-quiz-question { margin-bottom: 20px; }
-    .ai-quiz-question-text { font-weight: bold; margin-bottom: 10px; }
+    .ai-quiz-question-text { font-weight: bold; margin-bottom: 10px; color: var(--sh-ink, #1c2420); }
     .ai-quiz-option {
       display: block;
       width: 100%;
-      text-align: right;
+      text-align: start;
       padding: 10px 14px;
       margin-bottom: 6px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--sh-line, #ddd);
       border-radius: 8px;
-      background: #f9f9f9;
+      background: var(--sh-surface-2, #f9f9f9);
+      color: var(--sh-ink, #1c2420);
       cursor: pointer;
       font-size: 14px;
+      font-family: inherit;
     }
-    .ai-quiz-option:hover { background: #f0f0f0; }
-    .ai-quiz-option.correct { background: #dff0d8; border-color: #3c763d; }
-    .ai-quiz-option.incorrect { background: #f2dede; border-color: #a94442; }
+    .ai-quiz-option:hover { border-color: var(--sh-accent, #0e7a56); }
+
+    /* Right and wrong have to survive the dark theme too. A pale green wash
+       with the page's own ink was invisible there; these carry their own
+       foreground colour so the contrast does not depend on the theme. */
+    .ai-quiz-option.correct {
+      background: var(--sh-accent-soft, #dff0d8);
+      border-color: var(--sh-success, #3c763d);
+      color: var(--sh-accent-ink, #06301f);
+      font-weight: 600;
+    }
+    .ai-quiz-option.incorrect {
+      background: var(--sh-danger-soft, #f2dede);
+      border-color: var(--sh-danger, #a94442);
+      color: var(--sh-danger, #a94442);
+      font-weight: 600;
+    }
+
     .ai-flashcard {
-      border: 1px solid #ddd;
+      border: 1px solid var(--sh-line, #ddd);
       border-radius: 10px;
       padding: 18px;
       margin-bottom: 12px;
       cursor: pointer;
       min-height: 60px;
+      background: var(--sh-surface-2, #fff);
+      color: var(--sh-ink, #1c2420);
     }
-    .ai-flashcard-front { font-weight: bold; }
-    .ai-flashcard-back { display: none; margin-top: 10px; color: #555; }
+    .ai-flashcard:hover { border-color: var(--sh-accent, #0e7a56); }
+    .ai-flashcard-front { font-weight: bold; color: var(--sh-ink, #1c2420); }
+    .ai-flashcard-back {
+      display: none;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--sh-line, #e0e4dc);
+      color: var(--sh-ink, #1c2420);
+    }
     .ai-flashcard.flipped .ai-flashcard-back { display: block; }
-    .ai-flashcard.flipped .ai-flashcard-front { color: #888; }
+    /* The question stays legible once flipped - it used to fade to #888,
+       which in the dark theme is darker than the card behind it. */
+    .ai-flashcard.flipped .ai-flashcard-front { color: var(--sh-muted, #5c6660); }
 
     .viewer-fallback {
       position: absolute;

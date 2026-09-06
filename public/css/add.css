@@ -576,10 +576,3 @@ select.input-field:focus {
   color: #483C32;
   font-size: 1rem;
 }
-/* Tells the student the rule before they hit it, rather than after. */
-.upload-hint {
-  margin: -4px 0 10px;
-  font-size: 0.82rem;
-  color: var(--sh-muted, #6b7280);
-  text-align: center;
-}

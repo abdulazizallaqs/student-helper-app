@@ -1,12 +1,44 @@
 // AI study tools (quiz + flashcards) for the file viewer page (Display.html).
 (function () {
+  /** i18n with a fallback, for the panel's own wording (not the AI's answers). */
+  function tr(key, fallback) {
+    return typeof window.t === 'function' ? window.t(key, fallback) : fallback;
+  }
+
+  /**
+   * Lay the answers out in the direction the ANSWERS are written in.
+   *
+   * The panel was fixed at `direction: rtl` with its quiz options
+   * right-aligned. That is correct for Arabic notes and wrong for English
+   * ones - and it stayed wrong even after the model started replying in the
+   * document's own language, because the direction was decided by the
+   * stylesheet rather than by the text.
+   *
+   * Note this is NOT the interface language: a student reading the site in
+   * Arabic can open an English PDF, and its quiz belongs left-to-right.
+   */
+  function applyContentDirection(element, text) {
+    const sample = String(text || '').slice(0, 600);
+    const arabic = (sample.match(/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g) || []).length;
+    const latin = (sample.match(/[A-Za-z]/g) || []).length;
+    const rtl = arabic > latin;
+    element.dir = rtl ? 'rtl' : 'ltr';
+    element.style.textAlign = 'start';
+  }
+
   function getFileId() {
     return new URLSearchParams(window.location.search).get('id');
   }
 
   function openAiModal(title) {
+    const panel = document.querySelector('.ai-result-content');
+    // Until there is content, follow the interface language.
+    if (panel) panel.dir = document.documentElement.dir || 'ltr';
     document.getElementById('aiResultTitle').textContent = title;
-    document.getElementById('aiResultBody').innerHTML = '<p class="ai-loading">جاري التوليد بالذكاء الاصطناعي...</p>';
+    document.getElementById('aiResultBody').innerHTML =
+      '<p class="ai-loading"></p>';
+    document.querySelector('#aiResultBody .ai-loading').textContent =
+      tr('aiTools.generating', 'Generating with AI...');
     document.getElementById('aiResultModal').style.display = 'block';
   }
 
@@ -27,7 +59,7 @@
       const details = document.createElement('details');
       details.className = 'msg-error-detail';
       const summary = document.createElement('summary');
-      summary.textContent = 'التفاصيل التقنية';
+      summary.textContent = tr('aiTools.technicalDetails', 'Technical details');
       const pre = document.createElement('pre');
       pre.textContent = detail;
       details.appendChild(summary);
@@ -41,9 +73,14 @@
     body.innerHTML = '';
 
     if (!Array.isArray(quiz) || quiz.length === 0) {
-      showError('تعذر توليد اختبار من هذا الملف.');
+      showError(tr('aiTools.noQuiz', 'A quiz could not be generated from this file.'));
       return;
     }
+
+    // The direction comes from the questions themselves, not from the site's
+    // language setting - see applyContentDirection.
+    const panel = document.querySelector('.ai-result-content');
+    if (panel) applyContentDirection(panel, quiz.map((q) => q.question).join(' '));
 
     quiz.forEach((q, qi) => {
       const wrap = document.createElement('div');
@@ -81,13 +118,16 @@
     body.innerHTML = '';
 
     if (!Array.isArray(cards) || cards.length === 0) {
-      showError('تعذر توليد بطاقات مراجعة من هذا الملف.');
+      showError(tr('aiTools.noCards', 'Revision cards could not be generated from this file.'));
       return;
     }
 
+    const panel = document.querySelector('.ai-result-content');
+    if (panel) applyContentDirection(panel, cards.map((c) => `${c.front} ${c.back}`).join(' '));
+
     const hint = document.createElement('p');
     hint.className = 'ai-hint';
-    hint.textContent = 'اضغط على أي بطاقة لعرض الإجابة';
+    hint.textContent = tr('aiTools.flipHint', 'Tap any card to see the answer');
     body.appendChild(hint);
 
     cards.forEach(card => {
@@ -105,7 +145,9 @@
     const fileId = getFileId();
     if (!fileId) return;
 
-    openAiModal(kind === 'quiz' ? 'اختبار سريع' : 'بطاقات المراجعة');
+    openAiModal(kind === 'quiz'
+      ? tr('aiTools.quizTitle', 'Quick quiz')
+      : tr('aiTools.flashcardsTitle', 'Revision cards'));
 
     try {
       const response = await fetch(`/api/ai/${kind}/${fileId}`, { method: 'POST' });
@@ -115,7 +157,7 @@
         // `message` is the actionable sentence the API now returns (bad key,
         // quota used up, retired model, no network). `error` is just a code,
         // and `detail` is the exact upstream text in development.
-        showError(data.message || data.error || 'حدث خطأ أثناء التوليد.', data.detail);
+        showError(data.message || data.error || tr('aiTools.failed', 'Something went wrong while generating this.'), data.detail);
         return;
       }
 
@@ -126,7 +168,7 @@
       }
     } catch (error) {
       console.error('AI tool error:', error);
-      showError('تعذر الاتصال بالخادم.');
+      showError(tr('aiTools.offline', 'Could not reach the server.'));
     }
   }
 
