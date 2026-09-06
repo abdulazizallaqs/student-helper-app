@@ -1,3 +1,4 @@
+import '../setup/relaxAuthLimiter.js';
 import request from 'supertest';
 import path from 'path';
 import { describe, it, expect, beforeEach, afterEach, afterAll, vi } from 'vitest';
@@ -111,6 +112,113 @@ describe('POST /upload-note', () => {
       .attach('file', badFixture);
 
     expect(res.status).toBeGreaterThanOrEqual(400);
+  });
+
+  // ---- PDF only ----------------------------------------------------------
+  //
+  // Images, Word documents and zips used to be accepted. Every one of them was
+  // a half-supported path - unreadable in the viewer, invisible to the search
+  // indexer, refused by every AI tool - so a student who uploaded .docx notes
+  // got a file the app could not do anything with. One format handled properly
+  // beats five handled partly.
+  //
+  // Three separate checks, because the first two are only claims the uploader
+  // makes about the file, and a claim is not a fact.
+
+  it('rejects an image, which used to be allowed', async () => {
+    const categoryId = await seedCategory();
+    const { agent } = await registerAndLogin(app);
+
+    // A real 1x1 PNG, correctly named and correctly typed. Nothing about this
+    // upload is a lie - it is simply no longer a format this app takes.
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+      'base64'
+    );
+
+    const res = await agent
+      .post('/upload-note')
+      .field('title', 'Diagram')
+      .field('description', 'a genuine png')
+      .field('category', String(categoryId))
+      .attach('file', png, { filename: 'diagram.png', contentType: 'image/png' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/only pdf/i);
+
+    const [rows] = await testPool.query('SELECT id FROM Files');
+    expect(rows.length).toBe(0);
+  });
+
+  it('rejects a file whose BYTES are not a PDF, however it is labelled', async () => {
+    // The check that actually matters. `contentType` is a header the client
+    // wrote and the filename is a string it chose - both are free to lie:
+    //
+    //     curl -F 'file=@payload.html;type=application/pdf' -F 'title=notes.pdf'
+    //
+    // passes a type-and-extension filter without difficulty. A PDF begins
+    // %PDF-, and this one does not.
+    const categoryId = await seedCategory();
+    const { agent } = await registerAndLogin(app);
+    const disguised = Buffer.from('<html><script>alert(document.cookie)</script></html>', 'utf8');
+
+    const res = await agent
+      .post('/upload-note')
+      .field('title', 'Sneaky Notes')
+      .field('description', 'html wearing a pdf name')
+      .field('category', String(categoryId))
+      .attach('file', disguised, { filename: 'notes.pdf', contentType: 'application/pdf' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('notAPdf');
+
+    const [rows] = await testPool.query('SELECT id FROM Files');
+    expect(rows.length).toBe(0);
+  });
+
+  it('leaves nothing behind in public/uploads when it rejects a disguised file', async () => {
+    // A rejected upload has already been streamed to disk by multer in disk
+    // mode. Failing to remove it means every attack attempt leaves a file in
+    // a directory the app serves.
+    const categoryId = await seedCategory();
+    const { agent } = await registerAndLogin(app);
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+    const before = fs.existsSync(uploadsDir) ? fs.readdirSync(uploadsDir) : [];
+
+    await agent
+      .post('/upload-note')
+      .field('title', 'Leftover Check')
+      .field('description', 'should not survive')
+      .field('category', String(categoryId))
+      .attach('file', Buffer.from('PK not a pdf'), {
+        filename: 'leftover.pdf',
+        contentType: 'application/pdf',
+      });
+
+    const after = fs.existsSync(uploadsDir) ? fs.readdirSync(uploadsDir) : [];
+    expect(after).toEqual(before);
+  });
+
+  it('still accepts a real PDF', async () => {
+    const categoryId = await seedCategory();
+    const { agent } = await registerAndLogin(app);
+
+    const res = await agent
+      .post('/upload-note')
+      .field('title', 'Genuine Notes')
+      .field('description', 'a real pdf, the only thing that gets through')
+      .field('category', String(categoryId))
+      .attach('file', FIXTURE);
+
+    expect(res.status).toBe(302);
+
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+    for (const name of fs.readdirSync(uploadsDir)) {
+      if (name.includes('Genuine Notes')) uploadedFilePaths.push(path.join(uploadsDir, name));
+    }
+
+    const myFiles = await agent.get('/my-files');
+    expect(myFiles.body.some((f) => f.title.startsWith('Genuine Notes'))).toBe(true);
   });
 });
 

@@ -50,7 +50,7 @@
         <a href="/views/chat.html" class="navy" title="Messages" data-i18n-title="nav.messages" data-i18n-aria="nav.messages"><i class="fa-solid fa-comments"></i></a>
         <a href="/views/ai-buddy.html" class="navy" title="AI Study Buddy" data-i18n-title="nav.aiBuddy" data-i18n-aria="nav.aiBuddy"><i class="fas fa-robot"></i></a>
         <a href="/views/add-file.html" class="navy" title="Add a file" data-i18n-title="nav.addFile" data-i18n-aria="nav.addFile"><i class="fa fa-plus-square" aria-hidden="false"></i></a>
-        <a href="/views/File-page.html" class="navy" title="Files" data-i18n-title="nav.files" data-i18n-aria="nav.files"><i class="fa fa-file" aria-hidden="false"></i></a>
+        <a href="/views/file-page-forme.html" class="navy" title="Files" data-i18n-title="nav.files" data-i18n-aria="nav.files"><i class="fa fa-file" aria-hidden="false"></i></a>
         <a href="/views/favorite.html" class="navy" title="Favourites" data-i18n-title="nav.favorites" data-i18n-aria="nav.favorites"><i class="fa fa-bookmark" aria-hidden="false"></i></a>
       </nav>
     </div>
@@ -75,8 +75,18 @@
           <input type="text" name="title" class="input-field" placeholder="File name" data-i18n-placeholder="add.filename" required>
           <textarea name="description" class="input-field2" placeholder="Describe your file..." data-i18n-placeholder="add.describe" required></textarea>
 
+          <p class="upload-hint" data-i18n="add.pdfOnly">PDF files only - up to 10 MB.</p>
+
           <div class="button-container">
-            <input type="file" name="file" id="file" style="display: none;" required onchange="updateFileName()">
+            <!-- accept= is a filter on the picker, not a rule: it hides other
+                 files by default but the student can still switch the dialog
+                 to "All files", and it does nothing at all against a request
+                 that never opened a dialog. The real checks are on the server
+                 (routes/fileRoutes.js): declared type, extension, and the
+                 first five bytes. This is here so the common case never gets
+                 as far as an error. -->
+            <input type="file" name="file" id="file" accept="application/pdf,.pdf"
+                   style="display: none;" required onchange="updateFileName()">
             <input type="text" id="file-name" class="input-field" placeholder="No file selected" data-i18n-placeholder="add.noFile" readonly>
             <button class="btn-share"><i class="fa-solid fa-paperclip"
                 onclick="document.getElementById('file').click();"></i></button>
@@ -182,9 +192,24 @@
         const fileNameInput = document.getElementById('file-name'); // Reference to the text input for file name
 
         if (fileInput.files.length > 0) {
-          // Get the selected file's name
-          const selectedFile = fileInput.files[0].name;
-          fileNameInput.value = selectedFile; // Set the file name to the input field
+          const chosen = fileInput.files[0];
+
+          // Caught here purely so the answer is instant. The server checks the
+          // same thing properly - and checks the bytes, which a browser cannot
+          // be trusted to report - but making someone wait for a round trip
+          // and a page change to be told "not a PDF" is a poor way to say it.
+          if (!/\.pdf$/i.test(chosen.name)) {
+            fileInput.value = '';
+            fileNameInput.value = t('add.noFile', 'No file selected');
+            if (typeof showToast === 'function') {
+              showToast(t('add.pdfOnlyError', 'Only PDF files can be uploaded.'), 'error');
+            } else {
+              alert(t('add.pdfOnlyError', 'Only PDF files can be uploaded.'));
+            }
+            return;
+          }
+
+          fileNameInput.value = chosen.name;
         } else {
           // Reset to "No file selected" if no file is chosen
           fileNameInput.value = t('add.noFile', 'No file selected');

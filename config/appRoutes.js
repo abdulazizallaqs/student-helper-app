@@ -20,7 +20,14 @@ export const ADMIN_HOME = '/admin-dashboard';
  * home-screen shortcut - lands somewhere sensible rather than on a 404.
  */
 export const RETIRED_PAGES = {
-    '/views/User-Dashboard.html': USER_HOME
+    '/views/User-Dashboard.html': USER_HOME,
+    // File-page.html was a third listing page beside "For Me" and "My Files",
+    // and having three entrances to the same files is one more than anybody
+    // can hold in their head: the navbar's file icon led here, the tabs led
+    // to the other two, and which one you were looking at was anyone's guess.
+    // "For Me" is the landing page after sign-in and now the only file
+    // entrance; "My Files" is one tap away from it, where it belongs.
+    '/views/File-page.html': USER_HOME
 };
 
 export default { USER_HOME, ADMIN_HOME, RETIRED_PAGES };

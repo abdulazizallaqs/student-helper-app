@@ -73,6 +73,59 @@ class Favorite {
     }
 
     /**
+     * The ids of every file this user has favourited.
+     *
+     * The favourite button is a toggle, and a toggle has to know which way it
+     * is pointing before it is pressed. Without this the button rendered
+     * "not favourited" on every page load, so the first press on an
+     * already-favourited file tried to add it again - the server answered
+     * "already in your favourites" and nothing appeared to happen, which is
+     * exactly what an unresponsive button looks like.
+     *
+     * Ids only: the favourites PAGE needs titles and categories, but a list
+     * of cards only needs to know which bookmarks are filled in.
+     *
+     * @param {number} userId
+     * @returns {Promise<number[]>}
+     */
+    static async fileIdsForUser(userId) {
+        try {
+            const [rows] = await db.query('SELECT fileId FROM Favorit WHERE userId = ?', [userId]);
+            return rows.map((row) => Number(row.fileId));
+        } catch (error) {
+            throw new Error(`Error listing favorite file ids: ${error.message}`);
+        }
+    }
+
+    /**
+     * Remove a favourite by the FILE it points at, rather than by the
+     * favourite's own row id.
+     *
+     * Both are needed, and for different callers. The favourites page lists
+     * rows of Favorit, so it holds favoritId. Every other page lists FILES and
+     * never learns the favoritId at all - and a button that cannot say what to
+     * remove cannot un-favourite anything, which is why the toggle only ever
+     * worked in one direction.
+     *
+     * Scoped to userId, like remove(), so one user cannot delete another's.
+     *
+     * @param {number} userId
+     * @param {number} fileId
+     * @returns {Promise<boolean>} false when it was not a favourite to begin with
+     */
+    static async removeByFile(userId, fileId) {
+        try {
+            const [result] = await db.query(
+                'DELETE FROM Favorit WHERE userId = ? AND fileId = ?',
+                [userId, fileId]
+            );
+            return result.affectedRows > 0;
+        } catch (error) {
+            throw new Error(`Error removing from favorites: ${error.message}`);
+        }
+    }
+
+    /**
      * Remove a file from favorites. Scoped to userId so one user can't delete
      * another user's favorite by guessing/incrementing a favoritId.
      * @param {number} favoritId 

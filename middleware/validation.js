@@ -20,7 +20,16 @@ export const handleValidationErrors = (req, res, next) => {
         // JSON - turning a clear "search term is too long" into a generic
         // "search failed".
         const contentType = req.headers['content-type'] || '';
-        const isApiRequest = contentType.includes('application/json') || req.method === 'GET';
+        const accepts = req.headers.accept || '';
+        // DELETE is in this list for the same reason GET is: no HTML form can
+        // issue one, so a DELETE that fails validation is always a fetch()
+        // caller. Answering it with a 302 to an HTML page made the caller try
+        // to parse a login page as JSON, and a plain "that id is not a number"
+        // reached the student as "could not update your favourites".
+        const isApiRequest = contentType.includes('application/json')
+            || accepts.includes('application/json')
+            || req.method === 'GET'
+            || req.method === 'DELETE';
         const isFileUpload = contentType.includes('multipart/form-data');
 
         // If file was uploaded but validation failed, delete the file
@@ -276,6 +285,15 @@ export const validateId = [
     param('id')
         .isInt({ min: 1 })
         .withMessage('ID must be a valid positive number'),
+
+    handleValidationErrors
+];
+
+// Same rule as validateId, for routes whose parameter is named fileId.
+export const validateFileIdParam = [
+    param('fileId')
+        .isInt({ min: 1 })
+        .withMessage('File ID must be a valid positive number'),
 
     handleValidationErrors
 ];

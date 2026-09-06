@@ -1299,6 +1299,31 @@ button#confirmDeleteBtn, button#cancelDeleteBtn {
   box-shadow: none;
 }
 
+/* Already a favourite.
+   -----------------------------------------------------------------------
+   The bookmark is a toggle, and a toggle that looks the same in both states
+   is a toggle nobody can use: you cannot tell whether pressing it will add
+   or remove. Filled amber means "in your favourites, press to remove"; the
+   muted outline above means the opposite. Set from the server's answer on
+   every render, not guessed from whether you happened to click it. */
+.card-fav-btn.is-favorited,
+.flip-card-back .actions button.card-fav-btn.is-favorited {
+  background: var(--sh-fav-soft);
+  border-color: var(--sh-fav);
+  color: var(--sh-fav-ink);
+}
+
+.card-fav-btn.is-favorited i {
+  /* A solid glyph, so the state survives a stylesheet that has not loaded
+     its colours yet - and reads at a glance in either theme. */
+  text-shadow: 0 0 0 currentColor;
+}
+
+.card-fav-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
 /* The press acknowledgement, added by fileCard.js for one animation cycle. */
 .card-fav-btn.is-pressed {
   animation: sh-fav-pop 0.42s ease;

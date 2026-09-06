@@ -95,6 +95,111 @@ describe('favorites', () => {
     const listRes = await agent.get('/favorite');
     expect(listRes.body.some((f) => f.id === fileId)).toBe(false);
   });
+
+  // ---- the toggle ---------------------------------------------------------
+  //
+  // The bookmark is one button that both adds and removes. Pressing it a
+  // second time used to send another "add", get "already in your favourites"
+  // back, and change nothing on screen - a button that looked broken while
+  // behaving exactly as written. Two things were missing and both are covered
+  // here: a way to remove by FILE id (a list of cards never learns the
+  // favoritId), and a way to ask which files are already favourited (so the
+  // button knows which way it is pointing before it is pressed).
+
+  it('reports which file ids are favourited', async () => {
+    const { agent, user } = await registerAndLogin(app);
+    const [[row]] = await testPool.query('SELECT userId FROM Users WHERE username = ?', [user.username]);
+    const fileId = await seedFileForUser(row.userId);
+
+    const before = await agent.get('/api/favorites/ids');
+    expect(before.status).toBe(200);
+    expect(before.body.fileIds).toEqual([]);
+
+    await agent.post('/add-to-favorites').send({ fileId });
+
+    const after = await agent.get('/api/favorites/ids');
+    expect(after.body.fileIds).toEqual([fileId]);
+  });
+
+  it('requires a session to read the favourited ids', async () => {
+    const res = await request(app).get('/api/favorites/ids');
+    expect(res.status).toBe(401);
+  });
+
+  it('removes a favourite by file id - the second press on the bookmark', async () => {
+    const { agent, user } = await registerAndLogin(app);
+    const [[row]] = await testPool.query('SELECT userId FROM Users WHERE username = ?', [user.username]);
+    const fileId = await seedFileForUser(row.userId);
+
+    await agent.post('/add-to-favorites').send({ fileId });
+    expect((await agent.get('/api/favorites/ids')).body.fileIds).toEqual([fileId]);
+
+    const removeRes = await agent.delete(`/favorite/file/${fileId}`);
+    expect(removeRes.status).toBe(200);
+    expect(removeRes.body.removed).toBe(true);
+
+    expect((await agent.get('/api/favorites/ids')).body.fileIds).toEqual([]);
+    expect((await agent.get('/favorite')).body.some((f) => f.id === fileId)).toBe(false);
+  });
+
+  it('add, remove, add again all work - the toggle survives repetition', async () => {
+    const { agent, user } = await registerAndLogin(app);
+    const [[row]] = await testPool.query('SELECT userId FROM Users WHERE username = ?', [user.username]);
+    const fileId = await seedFileForUser(row.userId);
+
+    for (let round = 0; round < 3; round += 1) {
+      await agent.post('/add-to-favorites').send({ fileId });
+      expect((await agent.get('/api/favorites/ids')).body.fileIds).toEqual([fileId]);
+
+      await agent.delete(`/favorite/file/${fileId}`);
+      expect((await agent.get('/api/favorites/ids')).body.fileIds).toEqual([]);
+    }
+
+    // And exactly one row was ever created and destroyed, not three orphans.
+    const [rows] = await testPool.query('SELECT favoritId FROM Favorit WHERE userId = ?', [row.userId]);
+    expect(rows.length).toBe(0);
+  });
+
+  it('removing something that was never a favourite is not an error', async () => {
+    // The caller is a toggle: its goal is the "not favourited" state, and it
+    // is already there. A 404 would show the student a failure for an action
+    // that did what they asked.
+    const { agent, user } = await registerAndLogin(app);
+    const [[row]] = await testPool.query('SELECT userId FROM Users WHERE username = ?', [user.username]);
+    const fileId = await seedFileForUser(row.userId);
+
+    const res = await agent.delete(`/favorite/file/${fileId}`);
+    expect(res.status).toBe(200);
+    expect(res.body.removed).toBe(false);
+  });
+
+  it("does not let one user un-favourite another user's file by file id", async () => {
+    const owner = await registerAndLogin(app);
+    const [[ownerRow]] = await testPool.query('SELECT userId FROM Users WHERE username = ?', [owner.user.username]);
+    const fileId = await seedFileForUser(ownerRow.userId);
+    await owner.agent.post('/add-to-favorites').send({ fileId });
+
+    const intruder = await registerAndLogin(app);
+    const res = await intruder.agent.delete(`/favorite/file/${fileId}`);
+    expect(res.status).toBe(200);
+    expect(res.body.removed).toBe(false);      // nothing of theirs to remove
+
+    expect((await owner.agent.get('/api/favorites/ids')).body.fileIds).toEqual([fileId]);
+  });
+
+  it('requires a session to un-favourite by file id', async () => {
+    const res = await request(app).delete('/favorite/file/1');
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects a file id that is not a number, as JSON rather than a redirect', async () => {
+    // A DELETE can only come from fetch(), so a validation failure must answer
+    // in JSON. It used to 302 to an HTML page, which the caller then tried to
+    // parse as JSON - turning "that is not a number" into a generic failure.
+    const { agent } = await registerAndLogin(app);
+    const res = await agent.delete('/favorite/file/abc');
+    expect(res.status).toBe(400);
+  });
 });
 
 describe('file chat', () => {

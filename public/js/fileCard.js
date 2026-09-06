@@ -164,13 +164,15 @@
           if (typeof window.openMsg === 'function') window.openMsg(file.id, uploader);
           break;
         case 'favorite':
-          // Visible acknowledgement of the press. Whether the file was really
-          // added is reported by the toast that addToFavorites raises - this
-          // is only the button admitting it was clicked.
+          // A toggle, not an add. It used to call addToFavorites() every time,
+          // so a second press asked the server to add a file that was already
+          // there, got "already in your favourites" back, and changed nothing
+          // on screen - indistinguishable from a dead button.
           trigger.classList.remove('is-pressed');
           void trigger.offsetWidth; // restart the animation on a repeat click
           trigger.classList.add('is-pressed');
-          if (typeof window.addToFavorites === 'function') window.addToFavorites(file.id);
+          if (typeof window.toggleFavorite === 'function') window.toggleFavorite(file.id, trigger);
+          else if (typeof window.addToFavorites === 'function') window.addToFavorites(file.id);
           break;
         case 'unfavorite':
           if (typeof window.confirmDeletion === 'function') window.confirmDeletion(file.favoritId);
@@ -254,6 +256,31 @@
     const fragment = document.createDocumentFragment();
     files.forEach((file) => fragment.appendChild(buildFileCard(file, opts)));
     host.appendChild(fragment);
+
+    if (opts.favorite) syncFavoriteButtons(host);
+  }
+
+  /**
+   * Fill in the bookmarks that are already favourites.
+   *
+   * Cards are drawn from the file list, which says nothing about who has
+   * favourited what, so every bookmark starts out empty. Left that way the
+   * first press on an already-favourited file reads as "add" and appears to do
+   * nothing. One request per render (shared and cached in displayChat.js)
+   * settles the whole page.
+   */
+  function syncFavoriteButtons(host) {
+    if (typeof window.getFavoriteIds !== 'function') return;
+    window.getFavoriteIds().then((ids) => {
+      host.querySelectorAll('[data-action="favorite"]').forEach((button) => {
+        const card = button.closest('[data-file-id]');
+        if (!card) return;
+        const isFavorite = ids.has(Number(card.dataset.fileId));
+        if (typeof window.paintFavoriteButton === 'function') {
+          window.paintFavoriteButton(button, isFavorite);
+        }
+      });
+    }).catch(() => { /* the buttons still work, they just start empty */ });
   }
 
   window.addEventListener('sh:langchange', () => {

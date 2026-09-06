@@ -572,13 +572,28 @@
       openChat(fileId);
     });
 
-    document.getElementById('bookmark').addEventListener('click', function () {
-      const urlParams = new URLSearchParams(window.location.search);
-      const fileId = urlParams.get('id');
+    // The bookmark is a toggle here too. It used to call addToFavorites()
+    // unconditionally, so pressing it again to un-favourite did nothing at
+    // all - the server answered "already in your favourites" and the icon
+    // never changed.
+    (function wireBookmark() {
+      const bookmark = document.getElementById('bookmark');
+      if (!bookmark) return;
+      const fileId = new URLSearchParams(window.location.search).get('id');
+      if (!fileId) return;
 
-      addToFavorites(fileId);
+      // Draw it in the state it is actually in before anyone presses it.
+      if (typeof getFavoriteIds === 'function') {
+        getFavoriteIds()
+          .then((ids) => paintFavoriteButton(bookmark, ids.has(Number(fileId))))
+          .catch(() => { /* starts empty; still works */ });
+      }
 
-    });
+      bookmark.addEventListener('click', function () {
+        if (typeof toggleFavorite === 'function') toggleFavorite(fileId, bookmark);
+        else addToFavorites(fileId);
+      });
+    })();
     document.getElementById('btnShare').addEventListener('click', function () {
       if (!path) return;
       // `path` is an absolute URL now - the old value was a bare

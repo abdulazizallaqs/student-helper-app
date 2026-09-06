@@ -219,3 +219,17 @@ hr {
     inset-inline-end: 20px !important;
   }
 }
+
+/* The bookmark in the file toolbar is a toggle, so it has to look different
+   in its two states - otherwise there is no way to tell whether pressing it
+   will add the file or remove it. Same amber as the bookmark on the cards
+   (see .card-fav-btn.is-favorited in design-system.css). */
+.displaynavbar button.is-favorited {
+  background: var(--sh-fav, #b8860b);
+  border-color: var(--sh-fav, #b8860b);
+}
+
+.displaynavbar button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}

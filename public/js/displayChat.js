@@ -172,6 +172,148 @@ function addToFavorites(fileId) {
         });
 }
 
+
+/* ---------------------------------------------------------------------------
+   Favourites: one shared toggle for every page.
+   ---------------------------------------------------------------------------
+   The bookmark used to be add-only. Pressing it a second time to un-favourite
+   sent another "add", the server replied "already in your favourites", and the
+   button just sat there - the bug this block exists to remove.
+
+   Un-favouriting needs to know WHICH favourite row to delete, and a page that
+   lists files only knows file ids. /favorite/file/:fileId closes that gap, and
+   the id set below is what lets a freshly loaded page draw each bookmark in
+   the state it is actually in.
+--------------------------------------------------------------------------- */
+
+/** file ids this user has favourited; null until loaded. */
+let favoriteIdSet = null;
+/** in-flight request, so ten cards on a page share one round trip. */
+let favoriteIdsPromise = null;
+
+/**
+ * The set of favourited file ids, fetched once and cached.
+ * @param {boolean} [refresh] - fetch again instead of using the cache
+ * @returns {Promise<Set<number>>}
+ */
+function getFavoriteIds(refresh) {
+    if (!refresh && favoriteIdSet) return Promise.resolve(favoriteIdSet);
+    if (!refresh && favoriteIdsPromise) return favoriteIdsPromise;
+
+    favoriteIdsPromise = fetch('/api/favorites/ids', {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' }
+    })
+        .then((response) => (response.ok ? response.json() : { fileIds: [] }))
+        .then((data) => {
+            favoriteIdSet = new Set((data.fileIds || []).map(Number));
+            return favoriteIdSet;
+        })
+        .catch(() => {
+            // Not being able to read the list is not a reason to break the
+            // page: the buttons just start out empty and still work.
+            favoriteIdSet = favoriteIdSet || new Set();
+            return favoriteIdSet;
+        })
+        .finally(() => { favoriteIdsPromise = null; });
+
+    return favoriteIdsPromise;
+}
+
+/** Paint one bookmark button to match the state it represents. */
+function paintFavoriteButton(button, isFavorite) {
+    if (!button) return;
+    button.setAttribute('aria-pressed', isFavorite ? 'true' : 'false');
+    button.classList.toggle('is-favorited', !!isFavorite);
+    const label = isFavorite
+        ? shT('files.removeFavorite', 'Remove from favourites')
+        : shT('files.addFavorite', 'Add to favourites');
+    button.title = label;
+    button.setAttribute('aria-label', label);
+}
+
+/**
+ * Add or remove, whichever the button is not currently showing.
+ *
+ * The button is disabled for the duration. A double tap used to fire add and
+ * add again; now it cannot fire add and remove and leave the icon disagreeing
+ * with the database.
+ *
+ * @param {number|string} fileId
+ * @param {HTMLElement} [button] - the control to repaint
+ */
+async function toggleFavorite(fileId, button) {
+    const id = Number(fileId);
+    if (!Number.isFinite(id) || id <= 0) return;
+
+    const ids = await getFavoriteIds();
+    const wasFavorite = ids.has(id);
+    if (button) button.disabled = true;
+
+    try {
+        const response = wasFavorite
+            ? await fetch(`/favorite/file/${id}`, {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' }
+            })
+            : await fetch('/add-to-favorites', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ fileId: id })
+            });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (response.status === 401) {
+            if (typeof showToast === 'function') {
+                showToast(shT('common.sessionExpired', 'Your session has expired. Please log in again.'), 'error');
+            }
+            setTimeout(() => { window.location.href = '/login'; }, 1200);
+            return;
+        }
+        if (!response.ok) throw new Error(data.message || 'Request failed.');
+
+        if (wasFavorite) ids.delete(id); else ids.add(id);
+        paintFavoriteButton(button, !wasFavorite);
+
+        // Display.html has an inline confirmation strip; list pages use toasts.
+        const inlineMessage = document.getElementById('addFavorit');
+        if (inlineMessage && !wasFavorite) {
+            inlineMessage.style.display = 'inline';
+            setTimeout(() => { inlineMessage.style.display = 'none'; }, 3000);
+        } else if (typeof showToast === 'function') {
+            showToast(
+                wasFavorite
+                    ? shT('files.removedFavorite', 'Removed from favourites')
+                    : shT('files.addedFavorite', 'Added to favourites'),
+                'success'
+            );
+        }
+
+        // The favourites page is a list OF favourites: an item removed there
+        // has to leave, not just change colour.
+        if (wasFavorite) {
+            const card = document.querySelector(`[data-file-id="${id}"]`);
+            if (card && document.body.dataset.favoritesPage === 'true') card.remove();
+        }
+    } catch (error) {
+        console.error('Error toggling favorite:', error);
+        if (typeof showToast === 'function') {
+            showToast(error.message || 'Could not update your favourites.', 'error');
+        }
+        // Leave the button showing the truth as we last knew it.
+        paintFavoriteButton(button, wasFavorite);
+    } finally {
+        if (button) button.disabled = false;
+    }
+}
+
+window.getFavoriteIds = getFavoriteIds;
+window.paintFavoriteButton = paintFavoriteButton;
+window.toggleFavorite = toggleFavorite;
+
 ////////////////////////////
 function showCustomModal({ title, message, confirmText, cancelText, onConfirm, onCancel }) {
     const modal = document.getElementById('deleteConfirmationModal');
